@@ -14,7 +14,7 @@ class NFCDebug
         $this->context = $NFCContext;
     }
 
-    public function outputNFCTargetContext(CData $nfcTargetContext): void
+    public function outputNFCTargetContext(CData $nfcTargetContext): string
     {
         $string = $this->context->getFFI()->new('char *');
 
@@ -25,6 +25,6 @@ class NFCDebug
                 true
             );
 
-        echo \FFI::string($string);
+        return \FFI::string($string);
     }
 }

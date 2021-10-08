@@ -89,7 +89,7 @@ class NFCContext
         );
     }
 
-    public function findContainsByDeviceName(string $deviceName): NFCDevice
+    public function findDeviceNameContain(string $deviceName): NFCDevice
     {
         $exceptions = [];
         try {
@@ -128,10 +128,8 @@ class NFCContext
         return $this;
     }
 
-    public function start(array $modulations = [], NFCDevice $device = null): void
+    public function start(callable $callback, array $modulations = [], NFCDevice $device = null): void
     {
-        $nfcDebug = new NFCDebug($this);
-
         $modulationsSize = count($modulations);
 
         $nfcModulations = $this
@@ -158,21 +156,30 @@ class NFCContext
             ->ffi
             ->new('nfc_target');
 
-        $pollResult = $this
-            ->ffi
-            ->nfc_initiator_poll_target(
-                $device->getDeviceContext(),
-                $nfcModulations,
-                $modulationsSize,
-                $this->pollingContinuations,
-                $this->pollingInterval,
-                \FFI::addr($nfcTargetContext)
-            );
+        while (true) {
+            try {
+                $pollResult = $this
+                    ->ffi
+                    ->nfc_initiator_poll_target(
+                        $device->getDeviceContext(),
+                        $nfcModulations,
+                        $modulationsSize,
+                        $this->pollingContinuations,
+                        $this->pollingInterval,
+                        \FFI::addr($nfcTargetContext)
+                    );
 
-        if ($pollResult > 0) {
-            $nfcDebug->outputNFCTargetContext(
-                $nfcTargetContext
-            );
+                if ($pollResult > 0) {
+                    $callback(
+                        new NFCTargetContext(
+                            $this,
+                            $nfcTargetContext
+                        ),
+                    );
+                }
+            } catch (\Exception $e) {
+                echo $e . "\n";
+            }
         }
     }
 
