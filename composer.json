@@ -1,0 +1,21 @@
+{
+  "name": "m3m0r7/libnfc-for-php",
+  "description": "NFC Reader with the libnfc written in PHP",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "memory"
+    }
+  ],
+  "require": {
+    "php": ">=7.4|>=8",
+    "ext-ffi": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "NFC\\": "src/"
+    }
+  }
+}
