@@ -15,7 +15,7 @@ This library is toy for me. You can read NFC with libnfc written in PHP.
 # Warning
 
 - PaSoRi RC-S380 is not supported the libnfc. I have a roadmap to implement RC-S380.
-  - It is required to develop driver. For example, the nfcpy has been implemented.
+  - It is required to develop a driver. For example, the nfcpy has been implemented.
     - see: https://github.com/nfcpy/nfcpy/blob/master/src/nfc/clf/rcs380.py
 
 <img src="images/pasori.jpg">
