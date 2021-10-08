@@ -15,3 +15,4 @@ size_t nfc_list_devices(nfc_context *context, nfc_connstring connstrings[], size
 int nfc_initiator_select_passive_target(nfc_device *pnd, const nfc_modulation nm, const uint8_t *pbtInitData, const size_t szInitData, nfc_target *pnt);
 int nfc_initiator_poll_target(nfc_device *pnd, const nfc_modulation *pnmModulations, const size_t szModulations, const uint8_t uiPollNr, const uint8_t uiPeriod, nfc_target *pnt);
 int str_nfc_target(char **buf, const nfc_target *pnt, bool verbose);
+void nfc_free(void *p);

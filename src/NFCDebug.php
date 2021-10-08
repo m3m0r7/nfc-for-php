@@ -16,15 +16,27 @@ class NFCDebug
 
     public function outputNFCTargetContext(CData $nfcTargetContext): string
     {
-        $string = $this->context->getFFI()->new('char *');
+        $string = $this
+            ->context
+            ->getFFI()
+            ->new('char *');
 
-        $this->context->getFFI()
+        $this
+            ->context
+            ->getFFI()
             ->str_nfc_target(
                 \FFI::addr($string),
                 \FFI::addr($nfcTargetContext),
                 true
             );
 
-        return \FFI::string($string);
+        try {
+            return \FFI::string($string);
+        } finally {
+            $this
+                ->context
+                ->getFFI()
+                ->nfc_free($string);
+        }
     }
 }
