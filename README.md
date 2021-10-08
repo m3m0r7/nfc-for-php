@@ -38,7 +38,7 @@ $ php examples/nfc-poll.php
 
 4. Put your NFC
 
-<img src="images/felica.jpg">
+<img src="images/felica.png">
 
 5. You can get output.
 
