@@ -173,6 +173,7 @@ class NFCContext
                     $callback(
                         new NFCTargetContext(
                             $this,
+                            $device,
                             $nfcTargetContext
                         ),
                     );
