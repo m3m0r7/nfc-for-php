@@ -29,18 +29,24 @@ This library is toy for me. You can read NFC with libnfc written in PHP.
 $ brew install libnfc
 ```
 
-2. Connect NFC Device into your machine.
-3. Run example code
+2. Install this library
+
+```
+$ composer require m3m0r7/libnfc-for-php
+```
+
+3. Connect NFC Device into your machine.
+4. Run example code
 
 ```
 $ php examples/nfc-poll.php
 ```
 
-4. Put your NFC
+5. Put your NFC
 
 <img src="images/felica.png">
 
-5. You can get output.
+6. You can get output.
 
 <img src="images/example.jpg">
 
