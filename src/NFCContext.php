@@ -41,7 +41,10 @@ class NFCContext
         $this->isOpened = true;
 
         $this->eventManager
-            ->dispatchEvent('open', $this);
+            ->dispatchEvent(
+                NFCEventManager::EVENT_OPEN,
+                $this
+            );
 
         return $this;
     }
@@ -56,7 +59,11 @@ class NFCContext
         $this->validateContextOpened();
 
         $this->ffi->nfc_exit($this->context);
-        $this->eventManager->dispatchEvent('close', $this);
+        $this->eventManager
+            ->dispatchEvent(
+                NFCEventManager::EVENT_CLOSE,
+                $this
+            );
 
         $this->context = null;
         $this->isOpened = false;
@@ -198,7 +205,7 @@ class NFCContext
 
         $this->eventManager
             ->dispatchEvent(
-                'start',
+                NFCEventManager::EVENT_START,
                 $this,
                 $device
             );
@@ -223,7 +230,7 @@ class NFCContext
                 if ($pollResult > 0) {
                     $this->eventManager
                         ->dispatchEvent(
-                            'touch',
+                            NFCEventManager::EVENT_TOUCH,
                             $this,
                             $target = new NFCTarget(
                                 $this,
@@ -243,7 +250,7 @@ class NFCContext
                 } else {
                     $this->eventManager
                         ->dispatchEvent(
-                            'missing',
+                            NFCEventManager::EVENT_MISSING,
                             $this,
                             $device
                         );
@@ -251,7 +258,7 @@ class NFCContext
             } catch (\Throwable $e) {
                 $this->eventManager
                     ->dispatchEvent(
-                        'error',
+                        NFCEventManager::EVENT_ERROR,
                         $this,
                         $e
                     );

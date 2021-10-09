@@ -4,30 +4,31 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use NFC\NFC;
 use NFC\NFCDebug;
+use NFC\NFCEventManager;
 
 $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');
 $context = $nfc->createContext(
     (new \NFC\NFCEventManager())
         ->listen(
-            'open',
+            NFCEventManager::EVENT_OPEN,
             function (\NFC\NFCContext $context) {
                 echo "Opened NFC Context.\n";
             }
         )
         ->listen(
-            'close',
+            NFCEventManager::EVENT_CLOSE,
             function (\NFC\NFCContext $context) {
                 echo "Closed NFC Context.\n";
             }
         )
         ->listen(
-            'start',
+            NFCEventManager::EVENT_START,
             function (\NFC\NFCContext $context, \NFC\NFCDevice $device) {
                 echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
             }
         )
         ->listen(
-            'touch',
+            NFCEventManager::EVENT_TOUCH,
             function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
                 echo ((string) $nfcTargetContext) . "\n";
             }
