@@ -217,15 +217,15 @@ class NFCContext
                             $nfcTargetContext
                         )
                     );
-
-                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
-                        usleep(250);
-                    }
-
-                    $this->dispatchEvent(
-                        'leave',
-                        $target
-                    );
+//
+//                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
+//                        usleep(250);
+//                    }
+//
+//                    $this->dispatchEvent(
+//                        'leave',
+//                        $target
+//                    );
                 }
             } catch (\Exception $e) {
                 echo $e . "\n";
