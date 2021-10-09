@@ -5,7 +5,7 @@ namespace NFC;
 
 use FFI\CData;
 
-class NFCDebug
+class NFCOutput
 {
     protected NFCContext $context;
 

@@ -10,14 +10,10 @@ class ISO14443B2CT extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'uid' => ($ffi->nti->nci->abtUID[3] << 24) + ($ffi->nti->nci->abtUID[2] << 16) + ($ffi->nti->nci->abtUID[1] << 8) + $ffi->nti->nci->abtUID[0],
-            'product_code' => $ffi->nti->nci->btProdCode,
-            'fab_code' => $ffi->nti->nci->btFabCode,
+            'uid' => ($this->context->nci->abtUID[3] << 24) + ($this->context->nci->abtUID[2] << 16) + ($this->context->nci->abtUID[1] << 8) + $this->context->nci->abtUID[0],
+            'product_code' => $this->context->nci->btProdCode,
+            'fab_code' => $this->context->nci->btFabCode,
         ];
     }
 

@@ -10,14 +10,10 @@ class ISO14443B extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'pupi' => $ffi->nti->nbi->abtPupi,
-            'application_data' => $ffi->nti->nbi->abtApplicationData,
-            'protocol_info' => $ffi->nti->nbi->abtProtocolInfo,
+            'pupi' => $this->context->nbi->abtPupi,
+            'application_data' => $this->context->nbi->abtApplicationData,
+            'protocol_info' => $this->context->nbi->abtProtocolInfo,
         ];
     }
 

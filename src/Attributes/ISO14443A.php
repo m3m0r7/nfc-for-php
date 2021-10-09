@@ -10,15 +10,11 @@ class ISO14443A extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'atqa' => $ffi->nti->nai->abtAtqa,
-            'uid' => $ffi->nti->nai->abtUid,
-            'sak' => $ffi->nti->nai->abtSak,
-            'ats' => $ffi->nti->nai->abtAts,
+            'atqa' => $this->context->nai->abtAtqa,
+            'uid' => $this->context->nai->abtUid,
+            'sak' => $this->context->nai->abtSak,
+            'ats' => $this->context->nai->abtAts,
         ];
     }
 

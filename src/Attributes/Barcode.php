@@ -10,14 +10,10 @@ class Barcode extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         $data = [];
 
-        for ($i = 0; $i < $ffi->nti->nti->szDataLen; $i++) {
-            $data[] = $ffi->nti->nti->abtData[$i];
+        for ($i = 0; $i < $this->context->nti->szDataLen; $i++) {
+            $data[] = $this->context->nti->abtData[$i];
         }
 
         return [

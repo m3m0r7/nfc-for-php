@@ -10,16 +10,12 @@ class Dep extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'nfcid3' => $ffi->nti->ndi->abtNFCID3,
-            'bs' => (int) $ffi->nti->ndi->btBS,
-            'br' => (int) $ffi->nti->ndi->btBR,
-            'to' => (int) $ffi->nti->ndi->btTO,
-            'pp' => (int) $ffi->nti->ndi->btPP,
+            'nfcid3' => $this->context->ndi->abtNFCID3,
+            'bs' => (int) $this->context->ndi->btBS,
+            'br' => (int) $this->context->ndi->btBR,
+            'to' => (int) $this->context->ndi->btTO,
+            'pp' => (int) $this->context->ndi->btPP,
         ];
     }
 

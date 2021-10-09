@@ -10,10 +10,14 @@ use NFC\NFCTarget;
 abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
 {
     protected NFCTarget $target;
+    protected CData $context;
 
     public function __construct(NFCTarget $target)
     {
         $this->target = $target;
+        $this->context = $target
+            ->getNFCTargetContext()
+            ->nti;
     }
 
     abstract public function getAttributes(): array;
@@ -28,6 +32,6 @@ abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
         if ($this->getIDAttributeName() === null) {
             throw new NFCAttributeException('The target type has not an ID.');
         }
-        return $this->getAttributes()[$this->getIDAttributeName()];
+        return (string) $this->getAttributes()[$this->getIDAttributeName()];
     }
 }

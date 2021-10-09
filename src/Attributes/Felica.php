@@ -10,14 +10,20 @@ class Felica extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'nfcid2' => $ffi->nti->nfi->abtId,
-            'pad' => $ffi->nti->nfi->abtPad,
-            'sc' => $ffi->nti->nfi->abtSysCode,
+            'nfcid2' => sprintf(
+                '%02X%02X%02X%02X%02X%02X%02X%02X',
+                $this->context->nfi->abtId[0],
+                $this->context->nfi->abtId[1],
+                $this->context->nfi->abtId[2],
+                $this->context->nfi->abtId[3],
+                $this->context->nfi->abtId[4],
+                $this->context->nfi->abtId[5],
+                $this->context->nfi->abtId[6],
+                $this->context->nfi->abtId[7],
+            ),
+            'pad' => $this->context->nfi->abtPad,
+            'sc' => $this->context->nfi->abtSysCode,
         ];
     }
 

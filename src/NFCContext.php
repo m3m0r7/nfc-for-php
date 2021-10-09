@@ -17,6 +17,7 @@ class NFCContext
     protected NFCBaudRates $baudRates;
     protected NFCModulationTypes $modulationTypes;
     protected NFCEventManager $eventManager;
+    protected NFCOutput $output;
 
     public function __destruct()
     {
@@ -35,6 +36,7 @@ class NFCContext
 
         $this->ffi->nfc_init(\FFI::addr($this->context));
 
+        $this->output = new NFCOutput($this);
         $this->baudRates = new NFCBaudRates($this->ffi);
         $this->modulationTypes = new NFCModulationTypes($this->ffi);
 
@@ -224,7 +226,7 @@ class NFCContext
                         $modulationsSize,
                         $this->pollingContinuations,
                         $this->pollingInterval,
-                        \FFI::addr($nfcTargetContext),
+                        ($this->ffi)::addr($nfcTargetContext),
                     );
 
                 if ($pollResult > 0) {
@@ -280,6 +282,11 @@ class NFCContext
         return $this->modulationTypes;
     }
 
+    public function getOutput(): NFCOutput
+    {
+        return $this->output;
+    }
+
     private function validateContextOpened()
     {
         // Open context automatically.
@@ -291,6 +298,5 @@ class NFCContext
             throw new NFCException('Context was closed');
         }
     }
-
 }
 

@@ -10,13 +10,9 @@ class Jewel extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'jewel_id' => $ffi->nti->nji->btId,
-            'atqa' => $ffi->nti->nji->btSensRes,
+            'jewel_id' => $this->context->nji->btId,
+            'atqa' => $this->context->nji->btSensRes,
         ];
     }
 

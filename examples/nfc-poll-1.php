@@ -3,7 +3,7 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use NFC\NFC;
-use NFC\NFCDebug;
+use NFC\NFCOutput;
 use NFC\NFCEventManager;
 
 $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');

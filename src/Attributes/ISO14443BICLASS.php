@@ -10,12 +10,8 @@ class ISO14443BICLASS extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {
-        $ffi = $this->target
-            ->getNFCContext()
-            ->getFFI();
-
         return [
-            'uid' => $ffi->nti->nhi->abtUID,
+            'uid' => $this->context->nhi->abtUID,
         ];
     }
 
