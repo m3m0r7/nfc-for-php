@@ -271,7 +271,7 @@ class NFCContext
                         $device
                     );
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->dispatchEvent(
                     'error',
                     $e
