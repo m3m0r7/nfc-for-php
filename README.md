@@ -9,6 +9,7 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
 
 # Tested
 
+- Mac Big Sur
 - FeliCa
 - PaSoRi RC-S330
   - https://www.amazon.co.jp/dp/B001MVPD8U/
