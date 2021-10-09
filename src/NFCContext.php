@@ -300,7 +300,7 @@ class NFCContext
         if (!$this->isOpened) {
             $this->open();
         }
-        
+
         if ($this->context === null) {
             throw new NFCException('Context was closed');
         }

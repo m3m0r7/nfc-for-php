@@ -11,12 +11,21 @@ $context = $nfc->createContext();
 $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
-$context->addEventListener(
-    'touch',
-    function (\NFC\NFCTarget $nfcTargetContext) {
-        echo ((string) $nfcTargetContext) . "\n";
-    }
-);
+$context
+    ->addEventListener(
+        'start',
+        function (\NFC\NFCDevice $device) use ($context) {
+            echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
+        }
+    );
+
+$context
+    ->addEventListener(
+        'touch',
+        function (\NFC\NFCTarget $nfcTargetContext) {
+            echo ((string) $nfcTargetContext) . "\n";
+        }
+    );
 
 $context
     ->start(
