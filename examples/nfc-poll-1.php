@@ -6,26 +6,36 @@ use NFC\NFC;
 use NFC\NFCDebug;
 
 $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');
-$context = $nfc->createContext();
+$context = $nfc->createContext(
+    (new \NFC\NFCEventManager())
+        ->addEventListener(
+            'open',
+            function (\NFC\NFCContext $context) {
+                echo "Opened NFC Context.\n";
+            }
+        )
+        ->addEventListener(
+            'close',
+            function (\NFC\NFCContext $context) {
+                echo "Closed NFC Context.\n";
+            }
+        )
+        ->addEventListener(
+            'start',
+            function (\NFC\NFCContext $context, \NFC\NFCDevice $device) {
+                echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
+            }
+        )
+        ->addEventListener(
+            'touch',
+            function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
+                echo ((string) $nfcTargetContext) . "\n";
+            }
+        )
+);
 
 $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
-
-$context
-    ->addEventListener(
-        'start',
-        function (\NFC\NFCDevice $device) use ($context) {
-            echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
-        }
-    );
-
-$context
-    ->addEventListener(
-        'touch',
-        function (\NFC\NFCTarget $nfcTargetContext) {
-            echo ((string) $nfcTargetContext) . "\n";
-        }
-    );
 
 $context
     ->start(

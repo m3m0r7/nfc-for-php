@@ -16,25 +16,17 @@ class NFCContext
 
     protected NFCBaudRates $baudRates;
     protected NFCModulationTypes $modulationTypes;
-
-    protected array $events = [
-        'open' => [],
-        'close' => [],
-        'start' => [],
-        'touch' => [],
-        'leave' => [],
-        'missing' => [],
-        'error' => [],
-    ];
+    protected NFCEventManager $eventManager;
 
     public function __destruct()
     {
         $this->close();
     }
 
-    public function __construct(\FFI $ffi)
+    public function __construct(\FFI $ffi, NFCEventManager $eventManager)
     {
         $this->ffi = $ffi;
+        $this->eventManager = $eventManager;
     }
 
     public function open(): self
@@ -47,6 +39,9 @@ class NFCContext
         $this->modulationTypes = new NFCModulationTypes($this->ffi);
 
         $this->isOpened = true;
+
+        $this->eventManager
+            ->dispatchEvent('open', $this);
 
         return $this;
     }
@@ -61,7 +56,7 @@ class NFCContext
         $this->validateContextOpened();
 
         $this->ffi->nfc_exit($this->context);
-        $this->dispatchEvent('close');
+        $this->eventManager->dispatchEvent('close', $this);
 
         $this->context = null;
         $this->isOpened = false;
@@ -175,30 +170,6 @@ class NFCContext
         return $this;
     }
 
-    public function addEventListener(string $eventName, callable $callback): self
-    {
-        $this->validateContextOpened();
-
-        if (!isset($this->events[$eventName])) {
-            throw new NFCException("Unable add an event `{$eventName}`.");
-        }
-        $this->events[$eventName][] = $callback;
-        return $this;
-    }
-
-    protected function dispatchEvent(string $eventName, ...$parameters): void
-    {
-        $this->validateContextOpened();
-
-        if (!isset($this->events[$eventName])) {
-            throw new NFCException("Failed to dispatch `{$eventName}`.");
-        }
-
-        foreach ($this->events[$eventName] as $callback) {
-            $callback(...$parameters);
-        }
-    }
-
     public function start(array $modulations = [], NFCDevice $device = null): void
     {
         $this->validateContextOpened();
@@ -225,10 +196,12 @@ class NFCContext
             }
         }
 
-        $this->dispatchEvent(
-            'start',
-            $device
-        );
+        $this->eventManager
+            ->dispatchEvent(
+                'start',
+                $this,
+                $device
+            );
 
         while (true) {
             $nfcTargetContext = $this
@@ -248,14 +221,16 @@ class NFCContext
                     );
 
                 if ($pollResult > 0) {
-                    $this->dispatchEvent(
-                        'touch',
-                        $target = new NFCTarget(
+                    $this->eventManager
+                        ->dispatchEvent(
+                            'touch',
                             $this,
-                            $device,
-                            $nfcTargetContext
-                        )
-                    );
+                            $target = new NFCTarget(
+                                $this,
+                                $device,
+                                $nfcTargetContext
+                            )
+                        );
 //
 //                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
 //                        usleep(250);
@@ -266,16 +241,20 @@ class NFCContext
 //                        $target
 //                    );
                 } else {
-                    $this->dispatchEvent(
-                        'missing',
-                        $device
-                    );
+                    $this->eventManager
+                        ->dispatchEvent(
+                            'missing',
+                            $this,
+                            $device
+                        );
                 }
             } catch (\Throwable $e) {
-                $this->dispatchEvent(
-                    'error',
-                    $e
-                );
+                $this->eventManager
+                    ->dispatchEvent(
+                        'error',
+                        $this,
+                        $e
+                    );
             }
         }
     }

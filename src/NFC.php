@@ -19,7 +19,7 @@ class NFC
         $this->libraryPath = $libraryPath;
     }
 
-    public function createContext(): NFCContext
+    public function createContext(?NFCEventManager $eventManager = null): NFCContext
     {
         return $this->context = new NFCContext(
             \FFI::cdef(
@@ -32,6 +32,7 @@ class NFC
                 ),
                 $this->libraryPath,
             ),
+            $eventManager ?? new NFCEventManager(),
         );
     }
 
