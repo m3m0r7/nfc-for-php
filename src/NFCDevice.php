@@ -22,10 +22,16 @@ class NFCDevice
             ->context
             ->getFFI()
             ->nfc_close($this->deviceContext);
+
+        $this->deviceContext = null;
     }
 
     public function open(?string $connection = null): self
     {
+        if ($this->deviceContext !== null) {
+            throw new NFCDeviceException('NFC device already opened.');
+        }
+
         $this->deviceContext = $this
             ->context
             ->getFFI()

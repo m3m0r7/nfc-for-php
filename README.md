@@ -39,7 +39,7 @@ $ composer require m3m0r7/libnfc-for-php
 4. Run example code
 
 ```
-$ php examples/nfc-poll.php
+$ php examples/nfc-poll-1.php
 ```
 
 5. Put your NFC

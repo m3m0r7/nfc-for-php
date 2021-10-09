@@ -11,13 +11,15 @@ $context = $nfc->createContext();
 $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
-$nfcDebug = new NFCDebug($context);
+$context->addEventListener(
+    'touch',
+    function (\NFC\NFCTarget $nfcTargetContext) {
+        echo "{$nfcTargetContext->getTargetName()}({$nfcTargetContext->getBaudRate()})): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
+    }
+);
 
 $context
     ->start(
-        function (\NFC\NFCTargetContext $nfcTargetContext) {
-            echo ((string) $nfcTargetContext) . "\n";
-        },
         [
             new \NFC\NFCModulation($modulationTypes->NMT_ISO14443A, $baudRates->NBR_106),
             new \NFC\NFCModulation($modulationTypes->NMT_ISO14443B, $baudRates->NBR_106),

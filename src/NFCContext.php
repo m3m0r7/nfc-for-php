@@ -13,6 +13,14 @@ class NFCContext
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
 
+    protected NFCBaudRates $baudRates;
+    protected NFCModulationTypes $modulationTypes;
+
+    protected array $events = [
+        'touch' => [],
+        'leave' => [],
+    ];
+
     public function __destruct()
     {
         $this->close();
@@ -24,6 +32,9 @@ class NFCContext
         $this->context = $ffi->new('nfc_context *');
 
         $ffi->nfc_init(\FFI::addr($this->context));
+
+        $this->baudRates = new NFCBaudRates($this->ffi);
+        $this->modulationTypes = new NFCModulationTypes($this->ffi);
     }
 
     public function getFFI(): \FFI
@@ -34,6 +45,14 @@ class NFCContext
     public function close(): void
     {
         $this->ffi->nfc_exit($this->context);;
+    }
+
+
+    public function getVersion(): string
+    {
+        return $this
+            ->ffi
+            ->nfc_version();
     }
 
     public function getNFCContext(): CData
@@ -128,7 +147,27 @@ class NFCContext
         return $this;
     }
 
-    public function start(callable $callback, array $modulations = [], NFCDevice $device = null): void
+    public function addEventListener(string $eventName, callable $callback): self
+    {
+        if (!isset($this->events[$eventName])) {
+            throw new NFCException("Unable add an event `{$eventName}`.");
+        }
+        $this->events[$eventName][] = $callback;
+        return $this;
+    }
+
+    protected function dispatchEvent(string $eventName, ...$parameters): void
+    {
+        if (!isset($this->events[$eventName])) {
+            throw new NFCException("Failed to dispatch `{$eventName}`.");
+        }
+
+        foreach ($this->events[$eventName] as $callback) {
+            $callback(...$parameters);
+        }
+    }
+
+    public function start(array $modulations = [], NFCDevice $device = null): void
     {
         $modulationsSize = count($modulations);
 
@@ -152,11 +191,11 @@ class NFCContext
             }
         }
 
-        $nfcTargetContext = $this
-            ->ffi
-            ->new('nfc_target');
-
         while (true) {
+            $nfcTargetContext = $this
+                ->ffi
+                ->new('nfc_target');
+
             try {
                 $pollResult = $this
                     ->ffi
@@ -166,16 +205,26 @@ class NFCContext
                         $modulationsSize,
                         $this->pollingContinuations,
                         $this->pollingInterval,
-                        \FFI::addr($nfcTargetContext)
+                        \FFI::addr($nfcTargetContext),
                     );
 
                 if ($pollResult > 0) {
-                    $callback(
-                        new NFCTargetContext(
+                    $this->dispatchEvent(
+                        'touch',
+                        $target = new NFCTarget(
                             $this,
                             $device,
                             $nfcTargetContext
-                        ),
+                        )
+                    );
+
+                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
+                        usleep(250);
+                    }
+
+                    $this->dispatchEvent(
+                        'leave',
+                        $target
                     );
                 }
             } catch (\Exception $e) {
@@ -186,12 +235,12 @@ class NFCContext
 
     public function getBaudRates(): NFCBaudRates
     {
-        return new NFCBaudRates($this->ffi);
+        return $this->baudRates;
     }
 
     public function getModulationsTypes(): NFCModulationTypes
     {
-        return new NFCModulationTypes($this->ffi);
+        return $this->modulationTypes;
     }
 
 }
