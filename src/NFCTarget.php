@@ -22,6 +22,7 @@ class NFCTarget
     protected NFCContext $context;
     protected CData $nfcTargetContext;
     protected NFCDevice $device;
+    protected ?NFCTargetAttributeInterface $attribute = null;
 
     public function __construct(NFCContext $context, NFCDevice $device, CData $nfcTargetContext)
     {
@@ -121,25 +122,25 @@ class NFCTarget
 
         switch ($this->nfcTargetContext->nm->nmt) {
             case $modulationTypes->NMT_ISO14443A:
-                return new ISO14443A($this);
+                return $this->attribute ??= new ISO14443A($this);
             case $modulationTypes->NMT_JEWEL:
-                return new Jewel($this);
+                return $this->attribute ??= new Jewel($this);
             case $modulationTypes->NMT_ISO14443B:
-                return new ISO14443B($this);
+                return $this->attribute ??= new ISO14443B($this);
             case $modulationTypes->NMT_ISO14443BI:
-                return new ISO14443BI($this);
+                return $this->attribute ??= new ISO14443BI($this);
             case $modulationTypes->NMT_ISO14443B2SR:
-                return new ISO14443B2SR($this);
+                return $this->attribute ??= new ISO14443B2SR($this);
             case $modulationTypes->NMT_ISO14443B2CT:
-                return new ISO14443B2CT($this);
+                return $this->attribute ??= new ISO14443B2CT($this);
             case $modulationTypes->NMT_FELICA:
-                return new Felica($this);
+                return $this->attribute ??= new Felica($this);
             case $modulationTypes->NMT_DEP:
-                return new Dep($this);
+                return $this->attribute ??= new Dep($this);
             case $modulationTypes->NMT_BARCODE:
-                return new Barcode($this);
+                return $this->attribute ??= new Barcode($this);
             case $modulationTypes->NMT_ISO14443BICLASS:
-                return new ISO14443BICLASS($this);
+                return $this->attribute ??= new ISO14443BICLASS($this);
         }
 
         throw new NFCTargetException("Unknown target [{$this->nfcTargetContext->nm->nmt}, {$this->nfcTargetContext->nm->nbr}]");

@@ -13,6 +13,10 @@ class NFCContext
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
     protected bool $isOpened = false;
+    protected bool $enableContinuousTouchAdjustment = true;
+
+    // second
+    protected int $continuousTouchAdjustmentExpires = 10;
 
     protected NFCBaudRates $baudRates;
     protected NFCModulationTypes $modulationTypes;
@@ -71,7 +75,6 @@ class NFCContext
         $this->isOpened = false;
     }
 
-
     public function getVersion(): string
     {
         $this->validateContextOpened();
@@ -79,6 +82,18 @@ class NFCContext
         return $this
             ->ffi
             ->nfc_version();
+    }
+
+    public function enableContinuousTouchAdjustment(bool $which): self
+    {
+        $this->enableContinuousTouchAdjustment = $which;
+        return $this;
+    }
+
+    public function setContinuousTouchAdjustmentExpires(int $second): self
+    {
+        $this->continuousTouchAdjustmentExpires = $second;
+        return $this;
     }
 
     public function getNFCContext(): CData
@@ -212,6 +227,8 @@ class NFCContext
                 $device
             );
 
+        $touched = null;
+
         while (true) {
             $nfcTargetContext = $this
                 ->ffi
@@ -230,16 +247,44 @@ class NFCContext
                     );
 
                 if ($pollResult > 0) {
-                    $this->eventManager
-                        ->dispatchEvent(
-                            NFCEventManager::EVENT_TOUCH,
-                            $this,
-                            $target = new NFCTarget(
+                    $target = new NFCTarget(
+                        $this,
+                        $device,
+                        $nfcTargetContext
+                    );
+
+                    $info = [
+                        'class' => get_class(
+                            $target
+                                ->getAttributeAccessor()
+                        ),
+                        'id' => $target
+                            ->getAttributeAccessor()
+                            ->getID()
+                    ];
+
+                    $isTouchedMoment = false;
+
+                    if ($touched !== null && $info['id'] === $touched['id']) {
+                        if ($touched['expires'] > time()) {
+                            $isTouchedMoment = true;
+                        }
+                    }
+
+                    if (!$isTouchedMoment) {
+                        $this->eventManager
+                            ->dispatchEvent(
+                                NFCEventManager::EVENT_TOUCH,
                                 $this,
-                                $device,
-                                $nfcTargetContext
-                            )
-                        );
+                                $target
+                            );
+
+                        if ($this->enableContinuousTouchAdjustment) {
+                            $touched = $info + [
+                                    'expires' => time() + $this->continuousTouchAdjustmentExpires,
+                                ];
+                        }
+                    }
 //
 //                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
 //                        usleep(250);
