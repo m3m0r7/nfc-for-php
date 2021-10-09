@@ -11,16 +11,59 @@ class NFC
         __DIR__ . '/definitions/nfc-types.cdef',
         __DIR__ . '/definitions/nfc-routines.cdef',
     ];
-    protected string $libraryPath;
+
+    protected array $autoScanLocationsForUnix = [
+        '/usr/local/lib',
+        '/usr/lib',
+    ];
+
+    protected array $autoScanLibraryNames = [
+        'libnfc.dylib',
+        'libnfc.6.dylib',
+        'libnfc.so',
+        'libnfc.6.so',
+        'libnfc.dll',
+        'libnfc.6.dll',
+    ];
+
+    protected ?array $libraryPaths = null;
     protected ?NFCContext $context = null;
 
-    public function __construct(string $libraryPath)
+    public function __construct($libraryPaths = null)
     {
-        $this->libraryPath = $libraryPath;
+        if ($libraryPaths === null) {
+            $this->libraryPaths = $this->isWindows()
+                // Windows does not supported for auto scan locations.
+                ? []
+                : $this->autoScanLocationsForUnix;
+
+            if (!$this->isWindows()) {
+                // Add working directory
+                $this->libraryPaths[] = getcwd() . '/libnfc/lib';
+            }
+        } else {
+            $this->libraryPaths = (array) $libraryPaths;
+        }
     }
 
     public function createContext(?NFCEventManager $eventManager = null): NFCContext
     {
+        $libraryPath = null;
+        foreach ($this->libraryPaths as $path) {
+            if (is_file($path)) {
+                $libraryPath = $path;
+                break;
+            }
+            if (is_dir($path)) {
+                foreach ($this->autoScanLibraryNames as $name) {
+                    if (is_file($foundFilePath = $path . DIRECTORY_SEPARATOR . $name)) {
+                        $libraryPath = $foundFilePath;
+                        break 2;
+                    }
+                }
+            }
+        }
+
         return $this->context = new NFCContext(
             \FFI::cdef(
                 implode(
@@ -30,7 +73,7 @@ class NFC
                         $this->definitions
                     )
                 ),
-                $this->libraryPath,
+                $libraryPath,
             ),
             $eventManager ?? new NFCEventManager(),
         );
@@ -50,5 +93,10 @@ class NFC
                 "Context not opened. Please run `NFC::createContext` before."
             );
         }
+    }
+
+    protected function isWindows(): bool
+    {
+        return DIRECTORY_SEPARATOR === '\\';
     }
 }
