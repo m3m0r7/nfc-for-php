@@ -7,8 +7,9 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
 - PHP FFI
 - libnfc
 
-# Supported
+# Tested
 
+- FeliCa
 - PaSoRi RC-S330
   - https://www.amazon.co.jp/dp/B001MVPD8U/
 
@@ -49,7 +50,6 @@ $ php examples/nfc-poll-simple.php
 6. You can get output.
 
 <img src="images/example.jpg">
-
 
 # License
 - MIT
