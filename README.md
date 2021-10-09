@@ -1,6 +1,6 @@
 # What is libnfc-for-php?
 
-This library is toy for me. You can read NFC with libnfc written in PHP.
+This library is a toy for me. You can read NFC with libnfc written in PHP.
 
 # Requirements
 - PHP 7.4 or later
