@@ -8,25 +8,25 @@ use NFC\NFCDebug;
 $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');
 $context = $nfc->createContext(
     (new \NFC\NFCEventManager())
-        ->addEventListener(
+        ->listen(
             'open',
             function (\NFC\NFCContext $context) {
                 echo "Opened NFC Context.\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'close',
             function (\NFC\NFCContext $context) {
                 echo "Closed NFC Context.\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'start',
             function (\NFC\NFCContext $context, \NFC\NFCDevice $device) {
                 echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'touch',
             function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
                 echo ((string) $nfcTargetContext) . "\n";

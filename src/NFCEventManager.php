@@ -15,7 +15,7 @@ class NFCEventManager
         'error' => [],
     ];
 
-    public function addEventListener(string $eventName, callable $callback): self
+    public function listen(string $eventName, callable $callback): self
     {
         if (!isset($this->events[$eventName])) {
             throw new NFCException("Unable add an event `{$eventName}`.");

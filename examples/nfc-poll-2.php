@@ -8,37 +8,37 @@ $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');
 
 $context = $nfc->createContext(
     (new \NFC\NFCEventManager())
-        ->addEventListener(
+        ->listen(
             'open',
             function (\NFC\NFCContext $context) {
                 echo "Opened NFC Context.\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'close',
             function (\NFC\NFCContext $context) {
                 echo "Closed NFC Context.\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'start',
             function (\NFC\NFCContext $context, \NFC\NFCDevice $device) {
                 echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'touch',
             function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
                 echo "{$nfcTargetContext->getTargetName()}({$nfcTargetContext->getBaudRate()})): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'leave',
             function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
                 echo "Leave: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
             }
         )
-        ->addEventListener(
+        ->listen(
             'error',
             function (\NFC\NFCContext $context, Throwable $e) {
                 echo "An error occurred:\n{$e}\n";
