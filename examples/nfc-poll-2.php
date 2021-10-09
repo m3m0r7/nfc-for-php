@@ -3,7 +3,6 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use NFC\NFC;
-use NFC\NFCDebug;
 
 $nfc = new NFC('/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib');
 $context = $nfc->createContext();
@@ -11,12 +10,45 @@ $context = $nfc->createContext();
 $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
-$context->addEventListener(
-    'touch',
-    function (\NFC\NFCTarget $nfcTargetContext) {
-        echo "{$nfcTargetContext->getTargetName()}({$nfcTargetContext->getBaudRate()})): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
-    }
-);
+$context
+    ->addEventListener(
+        'close',
+        function () {
+            echo "Closed NFC Context.\n";
+        }
+    );
+
+$context
+    ->addEventListener(
+        'start',
+        function (\NFC\NFCDevice $device) use ($context) {
+            echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
+        }
+    );
+
+$context
+    ->addEventListener(
+        'touch',
+        function (\NFC\NFCTarget $nfcTargetContext) {
+            echo "{$nfcTargetContext->getTargetName()}({$nfcTargetContext->getBaudRate()})): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
+        }
+    );
+
+$context
+    ->addEventListener(
+        'leave',
+        function (\NFC\NFCTarget $nfcTargetContext) {
+            echo "Leave: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
+        }
+    );
+
+$context
+    ->addEventListener(
+        'error',
+        function (Throwable $e) {
+            echo "An error occurred:\n{$e}\n";
+        }
+    );
 
 $context
     ->start(

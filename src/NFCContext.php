@@ -8,17 +8,23 @@ use FFI\CData;
 class NFCContext
 {
     protected \FFI $ffi;
-    protected CData $context;
+    protected ?CData $context;
 
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
+    protected bool $isOpened = false;
 
     protected NFCBaudRates $baudRates;
     protected NFCModulationTypes $modulationTypes;
 
     protected array $events = [
+        'open' => [],
+        'close' => [],
+        'start' => [],
         'touch' => [],
         'leave' => [],
+        'missing' => [],
+        'error' => [],
     ];
 
     public function __destruct()
@@ -29,12 +35,20 @@ class NFCContext
     public function __construct(\FFI $ffi)
     {
         $this->ffi = $ffi;
-        $this->context = $ffi->new('nfc_context *');
+    }
 
-        $ffi->nfc_init(\FFI::addr($this->context));
+    public function open(): self
+    {
+        $this->context = $this->ffi->new('nfc_context *');
+
+        $this->ffi->nfc_init(\FFI::addr($this->context));
 
         $this->baudRates = new NFCBaudRates($this->ffi);
         $this->modulationTypes = new NFCModulationTypes($this->ffi);
+
+        $this->isOpened = true;
+
+        return $this;
     }
 
     public function getFFI(): \FFI
@@ -44,12 +58,20 @@ class NFCContext
 
     public function close(): void
     {
-        $this->ffi->nfc_exit($this->context);;
+        $this->validateContextOpened();
+
+        $this->ffi->nfc_exit($this->context);
+        $this->dispatchEvent('close');
+
+        $this->context = null;
+        $this->isOpened = false;
     }
 
 
     public function getVersion(): string
     {
+        $this->validateContextOpened();
+
         return $this
             ->ffi
             ->nfc_version();
@@ -57,6 +79,8 @@ class NFCContext
 
     public function getNFCContext(): CData
     {
+        $this->validateContextOpened();
+
         return $this->context;
     }
 
@@ -65,6 +89,8 @@ class NFCContext
      */
     public function getDevices(int $maxFetchDevices = 128): array
     {
+        $this->validateContextOpened();
+
         $connectionTargets = $this
             ->ffi
             ->new("nfc_connstring[{$maxFetchDevices}]");
@@ -110,6 +136,8 @@ class NFCContext
 
     public function findDeviceNameContain(string $deviceName): NFCDevice
     {
+        $this->validateContextOpened();
+
         $exceptions = [];
         try {
             /**
@@ -149,6 +177,8 @@ class NFCContext
 
     public function addEventListener(string $eventName, callable $callback): self
     {
+        $this->validateContextOpened();
+
         if (!isset($this->events[$eventName])) {
             throw new NFCException("Unable add an event `{$eventName}`.");
         }
@@ -158,6 +188,8 @@ class NFCContext
 
     protected function dispatchEvent(string $eventName, ...$parameters): void
     {
+        $this->validateContextOpened();
+
         if (!isset($this->events[$eventName])) {
             throw new NFCException("Failed to dispatch `{$eventName}`.");
         }
@@ -169,6 +201,8 @@ class NFCContext
 
     public function start(array $modulations = [], NFCDevice $device = null): void
     {
+        $this->validateContextOpened();
+
         $modulationsSize = count($modulations);
 
         $nfcModulations = $this
@@ -190,6 +224,11 @@ class NFCContext
                 throw new NFCException('NFC Device not found.');
             }
         }
+
+        $this->dispatchEvent(
+            'start',
+            $device
+        );
 
         while (true) {
             $nfcTargetContext = $this
@@ -226,21 +265,45 @@ class NFCContext
 //                        'leave',
 //                        $target
 //                    );
+                } else {
+                    $this->dispatchEvent(
+                        'missing',
+                        $device
+                    );
                 }
             } catch (\Exception $e) {
-                echo $e . "\n";
+                $this->dispatchEvent(
+                    'error',
+                    $e
+                );
             }
         }
     }
 
     public function getBaudRates(): NFCBaudRates
     {
+        $this->validateContextOpened();
+
         return $this->baudRates;
     }
 
     public function getModulationsTypes(): NFCModulationTypes
     {
+        $this->validateContextOpened();
+
         return $this->modulationTypes;
+    }
+
+    private function validateContextOpened()
+    {
+        // Open context automatically.
+        if (!$this->isOpened) {
+            $this->open();
+        }
+        
+        if ($this->context === null) {
+            throw new NFCException('Context was closed');
+        }
     }
 
 }
