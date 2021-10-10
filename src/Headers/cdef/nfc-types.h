@@ -1,66 +1,49 @@
-/**
- * License: https://github.com/nfc-tools/libnfc/blob/master/COPYING
+/*-
+ * Free/Libre Near Field Communication (NFC) library
+ *
+ * Libnfc historical contributors:
+ * Copyright (C) 2009      Roel Verdult
+ * Copyright (C) 2009-2013 Romuald Conty
+ * Copyright (C) 2010-2012 Romain Tartière
+ * Copyright (C) 2010-2013 Philippe Teuwen
+ * Copyright (C) 2012-2013 Ludovic Rousseau
+ * See AUTHORS file for a more comprehensive list of contributors.
+ * Additional contributors of this file:
+ * Copyright (C) 2020      Adam Laurie
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-typedef char nfc_connstring[1024];
-
-typedef enum {
-  NOT_INTRUSIVE,
-  INTRUSIVE,
-  NOT_AVAILABLE,
-} scan_type_enum;
-
-struct nfc_user_defined_device {
-  char name[256];
-  nfc_connstring connstring;
-  bool optional;
-};
-
-struct nfc_context {
-  bool allow_autoscan;
-  bool allow_intrusive_scan;
-  uint32_t  log_level;
-  struct nfc_user_defined_device user_defined_devices[4];
-  unsigned int user_defined_device_count;
-};
-
+/**
+ * NFC context
+ */
 typedef struct nfc_context nfc_context;
-
-/**
- * @struct nfc_device
- * @brief NFC device information
- */
-struct nfc_device {
-  const nfc_context *context;
-  const struct nfc_driver *driver;
-  void *driver_data;
-  void *chip_data;
-
-  /** Device name string, including device wrapper firmware */
-  char    name[256];
-  /** Device connection string */
-  nfc_connstring connstring;
-  /** Is the CRC automaticly added, checked and removed from the frames */
-  bool    bCrc;
-  /** Does the chip handle parity bits, all parities are handled as data */
-  bool    bPar;
-  /** Should the chip handle frames encapsulation and chaining */
-  bool    bEasyFraming;
-  /** Should the chip try forever on select? */
-  bool    bInfiniteSelect;
-  /** Should the chip switch automatically activate ISO14443-4 when
-      selecting tags supporting it? */
-  bool    bAutoIso14443_4;
-  /** Supported modulation encoded in a byte */
-  uint8_t  btSupportByte;
-  /** Last reported error */
-  int     last_error;
-};
 
 /**
  * NFC device
  */
 typedef struct nfc_device nfc_device;
+
+/**
+ * NFC device driver
+ */
+typedef struct nfc_driver nfc_driver;
+
+/**
+ * Connection string
+ */
+typedef char nfc_connstring[NFC_BUFSIZE_CONNSTRING];
 
 /**
  * Properties
