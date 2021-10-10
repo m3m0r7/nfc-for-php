@@ -5,6 +5,7 @@ namespace NFC;
 
 use FFI\CData;
 use NFC\Contexts\FFIContextProxy;
+use NFC\Drivers\LibNFC;
 use NFC\Headers\NFCConstants;
 use NFC\Headers\NFCInternalConstants;
 use NFC\Headers\NFCLogConstants;
@@ -32,7 +33,6 @@ class NFC
         'libnfc.6.dll',
     ];
 
-    protected int $libNFCLogLevel = NFCLogConstants::NFC_LOG_PRIORITY_NONE;
     protected ?array $libraryPaths = null;
     protected ?NFCContext $context = null;
 
@@ -53,17 +53,8 @@ class NFC
         }
     }
 
-    public function setLibNFCLogLevel(int $level): self
+    public function createContext(?NFCEventManager $eventManager = null, string $driverClassName = LibNFC::class): NFCContext
     {
-        $this->libNFCLogLevel = $level;
-        return $this;
-    }
-
-    public function createContext(?NFCEventManager $eventManager = null): NFCContext
-    {
-        // Set libnfc log level;
-        putenv("LIBNFC_LOG_LEVEL={$this->libNFCLogLevel}");
-
         $libraryPath = null;
         foreach ($this->libraryPaths as $path) {
             if (is_file($path)) {
@@ -115,6 +106,7 @@ class NFC
                 )
             ),
             $eventManager ?? new NFCEventManager(),
+            $driverClassName,
         );
     }
 

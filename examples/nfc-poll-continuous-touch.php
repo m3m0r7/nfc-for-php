@@ -21,7 +21,10 @@ $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
 $context
-    ->enableContinuousTouchAdjustment(false)
+    ->getDriver()
+    ->enableContinuousTouchAdjustment(false);
+
+$context
     ->start(
         $context->findDeviceNameContain('Sony'),
         (new \NFC\Util\PredefinedModulations($context))
