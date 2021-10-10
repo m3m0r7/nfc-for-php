@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC;
 
+use NFC\Attributes\NFCTargetAttributeInterface;
+use NFC\Contexts\ContextProxyInterface;
 use NFC\Drivers\LibNFC\Attributes\Barcode;
 use NFC\Drivers\LibNFC\Attributes\Dep;
 use NFC\Drivers\LibNFC\Attributes\FeliCa;
@@ -13,9 +15,8 @@ use NFC\Drivers\LibNFC\Attributes\ISO14443B2SR;
 use NFC\Drivers\LibNFC\Attributes\ISO14443BI;
 use NFC\Drivers\LibNFC\Attributes\ISO14443BICLASS;
 use NFC\Drivers\LibNFC\Attributes\Jewel;
-use NFC\Attributes\NFCTargetAttributeInterface;
-use NFC\Contexts\ContextProxyInterface;
 use NFC\NFCContext;
+use NFC\NFCDeviceInterface;
 use NFC\NFCTargetException;
 use NFC\NFCTargetInterface;
 
@@ -23,10 +24,10 @@ class NFCTarget implements NFCTargetInterface
 {
     protected NFCContext $context;
     protected ContextProxyInterface $nfcTargetContext;
-    protected NFCDevice $device;
+    protected NFCDeviceInterface $device;
     protected ?NFCTargetAttributeInterface $attribute = null;
 
-    public function __construct(NFCContext $context, NFCDevice $device, ContextProxyInterface $nfcTargetContext)
+    public function __construct(NFCContext $context, NFCDeviceInterface $device, ContextProxyInterface $nfcTargetContext)
     {
         $this->context = $context;
         $this->device = $device;
@@ -82,7 +83,7 @@ class NFCTarget implements NFCTargetInterface
         return $this->context;
     }
 
-    public function getNFCDevice(): NFCDevice
+    public function getNFCDevice(): NFCDeviceInterface
     {
         return $this->device;
     }
@@ -95,7 +96,7 @@ class NFCTarget implements NFCTargetInterface
             ->outputNFCTargetContext($this);
     }
 
-    public function getTargetName(): string
+    public function getModulationType(): string
     {
         return $this
             ->context

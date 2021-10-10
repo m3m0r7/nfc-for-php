@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace NFC\Drivers\LibNFC;
 
 use FFI\CData;
+use NFC\Contexts\ContextProxyInterface;
+use NFC\Contexts\NFCDeviceContextProxy;
 use NFC\Headers\NFCConstants;
 use NFC\NFCContext;
 use NFC\NFCDeviceException;
@@ -15,13 +17,14 @@ class NFCDevice implements NFCDeviceInterface
     protected string $connection;
     protected NFCContext $context;
     protected ?CData $deviceContext = null;
+    protected ?NFCDeviceContextProxy $deviceContextProxy = null;
 
     public function __construct(NFCContext $context)
     {
         $this->context = $context;
     }
 
-    public function close()
+    public function close(): void
     {
         $this->validateDeviceOpened();
 
@@ -121,9 +124,9 @@ class NFCDevice implements NFCDeviceInterface
         return $this->connection;
     }
 
-    public function getDeviceContext()
+    public function getDeviceContext(): ContextProxyInterface
     {
-        return $this->deviceContext;
+        return $this->deviceContextProxy ??= new NFCDeviceContextProxy($this->deviceContext);
     }
 
     protected function validateDeviceOpened(): void

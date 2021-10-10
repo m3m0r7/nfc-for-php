@@ -30,13 +30,13 @@ $context = $nfc->createContext(
         ->listen(
             NFCEventManager::EVENT_TOUCH,
             function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
-                echo "{$nfcTargetContext->getTargetName()} ({$nfcTargetContext->getBaudRate()}): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
+                echo "{$nfcTargetContext->getModulationType()} ({$nfcTargetContext->getBaudRate()}): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
             }
         )
         ->listen(
             NFCEventManager::EVENT_RELEASE,
             function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
-                echo "Release: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
+                echo "Release: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getModulationType()})\n";
             }
         )
         ->listen(

@@ -5,7 +5,7 @@ namespace NFC\Contexts;
 
 use FFI\CData;
 
-class NFCTargetContextProxy implements ContextProxyInterface
+class NFCDeviceContextProxy implements ContextProxyInterface
 {
     use ContextAccessible;
 }

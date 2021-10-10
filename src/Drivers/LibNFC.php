@@ -257,7 +257,7 @@ class LibNFC implements DriverInterface
     {
         $isPresent = $this->NFCContext->getFFI()
                 ->nfc_initiator_target_is_present(
-                    $device->getDeviceContext(),
+                    $device->getDeviceContext()->getContext(),
                     \FFI::addr($target->getNFCTargetContext()->getContext())
                 ) === 0;
 
@@ -279,7 +279,7 @@ class LibNFC implements DriverInterface
         $result = $this
             ->NFCContext->getFFI()
             ->nfc_initiator_poll_target(
-                $device->getDeviceContext(),
+                $device->getDeviceContext()->getContext(),
                 $modulations->toCDataStructure($this->NFCContext->getFFI()),
                 count($modulations),
                 $this->pollingContinuations,
