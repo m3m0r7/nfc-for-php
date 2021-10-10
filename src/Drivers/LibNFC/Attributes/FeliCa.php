@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC\Attributes;
+namespace NFC\Drivers\LibNFC\Attributes;
 
-use FFI\CData;
-use NFC\NFCTarget;
+use NFC\Attributes\AbstractNFCTargetAttribute;
 
-class Felica extends AbstractNFCTargetAttribute
+class FeliCa extends AbstractNFCTargetAttribute
 {
     public function getAttributes(): array
     {

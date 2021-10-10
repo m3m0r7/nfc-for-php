@@ -6,13 +6,14 @@ namespace NFC\Attributes;
 use FFI\CData;
 use NFC\NFCAttributeException;
 use NFC\NFCTarget;
+use NFC\NFCTargetInterface;
 
 abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
 {
-    protected NFCTarget $target;
+    protected NFCTargetInterface $target;
     protected CData $context;
 
-    public function __construct(NFCTarget $target)
+    public function __construct(NFCTargetInterface $target)
     {
         $this->target = $target;
         $this->context = $target

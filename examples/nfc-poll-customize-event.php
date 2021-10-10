@@ -23,19 +23,19 @@ $context = $nfc->createContext(
         )
         ->listen(
             NFCEventManager::EVENT_START,
-            function (\NFC\NFCContext $context, \NFC\NFCDevice $device) {
+            function (\NFC\NFCContext $context, \NFC\NFCDeviceInterface $device) {
                 echo "NFC Reader started ({$context->getVersion()}): {$device->getDeviceName()}\n";
             }
         )
         ->listen(
             NFCEventManager::EVENT_TOUCH,
-            function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
                 echo "{$nfcTargetContext->getTargetName()} ({$nfcTargetContext->getBaudRate()}): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
             }
         )
         ->listen(
             NFCEventManager::EVENT_RELEASE,
-            function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
                 echo "Release: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
             }
         )

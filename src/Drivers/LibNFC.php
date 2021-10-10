@@ -7,18 +7,20 @@ use FFI\CData;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCTargetContextProxy;
+use NFC\Drivers\LibNFC\NFCDevice;
+use NFC\Drivers\LibNFC\NFCTarget;
 use NFC\Headers\NFCConstants;
 use NFC\Headers\NFCInternalConstants;
 use NFC\Headers\NFCLogConstants;
 use NFC\NFCBaudRates;
 use NFC\NFCContext;
-use NFC\NFCDevice;
 use NFC\NFCDeviceException;
 use NFC\NFCDeviceInfo;
+use NFC\NFCDeviceInterface;
 use NFC\NFCEventManager;
 use NFC\NFCException;
 use NFC\NFCModulationTypes;
-use NFC\NFCTarget;
+use NFC\NFCTargetInterface;
 
 class LibNFC implements DriverInterface
 {
@@ -105,7 +107,7 @@ class LibNFC implements DriverInterface
             ->nfc_version();
     }
 
-    public function findDeviceNameContain(string $deviceName): NFCDevice
+    public function findDeviceNameContain(string $deviceName): NFCDeviceInterface
     {
         $this->validateContextOpened();
 
@@ -138,7 +140,7 @@ class LibNFC implements DriverInterface
         );
     }
 
-    public function start(NFCDevice $device = null, NFCModulations $modulations = null): void
+    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
     {
         $this->validateContextOpened();
 
@@ -251,7 +253,7 @@ class LibNFC implements DriverInterface
         }
     }
 
-    public function isPresent(NFCDevice $device, NFCTarget $target): bool
+    public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
         $isPresent = $this->NFCContext->getFFI()
                 ->nfc_initiator_target_is_present(
@@ -268,7 +270,7 @@ class LibNFC implements DriverInterface
         return $isPresent;
     }
 
-    public function poll(NFCDevice $device, NFCModulations $modulations): ?ContextProxyInterface
+    public function poll(NFCDeviceInterface $device, NFCModulations $modulations): ?ContextProxyInterface
     {
         $nfcTargetContext = $this
             ->NFCContext->getFFI()

@@ -1,25 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC;
+namespace NFC\Drivers\LibNFC;
 
-use FFI\CData;
-use NFC\Attributes\Barcode;
-use NFC\Attributes\Dep;
-use NFC\Attributes\Felica;
-use NFC\Attributes\ISO14443A;
-use NFC\Attributes\ISO14443B;
-use NFC\Attributes\ISO14443B2CT;
-use NFC\Attributes\ISO14443B2SR;
-use NFC\Attributes\ISO14443BI;
-use NFC\Attributes\ISO14443BICLASS;
-use NFC\Attributes\Jewel;
+use NFC\Drivers\LibNFC\Attributes\Barcode;
+use NFC\Drivers\LibNFC\Attributes\Dep;
+use NFC\Drivers\LibNFC\Attributes\FeliCa;
+use NFC\Drivers\LibNFC\Attributes\ISO14443A;
+use NFC\Drivers\LibNFC\Attributes\ISO14443B;
+use NFC\Drivers\LibNFC\Attributes\ISO14443B2CT;
+use NFC\Drivers\LibNFC\Attributes\ISO14443B2SR;
+use NFC\Drivers\LibNFC\Attributes\ISO14443BI;
+use NFC\Drivers\LibNFC\Attributes\ISO14443BICLASS;
+use NFC\Drivers\LibNFC\Attributes\Jewel;
 use NFC\Attributes\NFCTargetAttributeInterface;
 use NFC\Contexts\ContextProxyInterface;
-use NFC\Contexts\NFCTargetContextProxy;
-use Throwable;
+use NFC\NFCContext;
+use NFC\NFCTargetInterface;
 
-class NFCTarget
+class NFCTarget implements NFCTargetInterface
 {
     protected NFCContext $context;
     protected ContextProxyInterface $nfcTargetContext;
@@ -134,7 +133,7 @@ class NFCTarget
             case $modulationTypes->NMT_ISO14443B2CT:
                 return $this->attribute ??= new ISO14443B2CT($this);
             case $modulationTypes->NMT_FELICA:
-                return $this->attribute ??= new Felica($this);
+                return $this->attribute ??= new FeliCa($this);
             case $modulationTypes->NMT_DEP:
                 return $this->attribute ??= new Dep($this);
             case $modulationTypes->NMT_BARCODE:

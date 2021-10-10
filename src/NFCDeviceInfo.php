@@ -6,9 +6,9 @@ namespace NFC;
 class NFCDeviceInfo
 {
     protected string $connectionTarget;
-    protected NFCDevice $nfcDevice;
+    protected NFCDeviceInterface $nfcDevice;
 
-    public function __construct(string $connectionTarget, NFCDevice $nfcDevice)
+    public function __construct(string $connectionTarget, NFCDeviceInterface $nfcDevice)
     {
         $this->connectionTarget = $connectionTarget;
         $this->nfcDevice = $nfcDevice;
@@ -24,7 +24,7 @@ class NFCDeviceInfo
         return $this->nfcDevice->getDeviceName();
     }
 
-    public function getDevice(): NFCDevice
+    public function getDevice(): NFCDeviceInterface
     {
         return $this->nfcDevice;
     }

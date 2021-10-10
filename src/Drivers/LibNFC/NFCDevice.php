@@ -1,12 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC;
+namespace NFC\Drivers\LibNFC;
 
 use FFI\CData;
 use NFC\Headers\NFCConstants;
+use NFC\NFCContext;
+use NFC\NFCDeviceException;
+use NFC\NFCDeviceInterface;
+use NFC\NFCException;
 
-class NFCDevice
+class NFCDevice implements NFCDeviceInterface
 {
     protected string $connection;
     protected NFCContext $context;

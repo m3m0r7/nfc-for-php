@@ -54,12 +54,12 @@ class NFCContext
         return $this->driver->getDevices($includeCannotOpenDevices);
     }
 
-    public function findDeviceNameContain(string $deviceName): NFCDevice
+    public function findDeviceNameContain(string $deviceName): NFCDeviceInterface
     {
         return $this->driver->findDeviceNameContain($deviceName);
     }
 
-    public function start(NFCDevice $device = null, NFCModulations $modulations = null): void
+    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
     {
         $this->driver->start($device, $modulations);
     }

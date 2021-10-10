@@ -14,7 +14,7 @@ class NFCOutput
         $this->context = $NFCContext;
     }
 
-    public function outputNFCTargetContext(NFCTarget $nfcTarget): string
+    public function outputNFCTargetContext(NFCTargetInterface $nfcTarget): string
     {
         $string = $this
             ->context

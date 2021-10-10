@@ -11,7 +11,7 @@ $context = $nfc->createContext(
     (new \NFC\NFCEventManager())
         ->listen(
             NFCEventManager::EVENT_TOUCH,
-            function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
                 echo ((string) $nfcTargetContext) . "\n";
             }
         )
