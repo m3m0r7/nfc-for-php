@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC\Drivers;
+namespace NFC\Drivers\LibNFC;
 
 use FFI\CData;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCTargetContextProxy;
+use NFC\Drivers\DriverInterface;
 use NFC\Drivers\LibNFC\NFCDevice;
 use NFC\Drivers\LibNFC\NFCTarget;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;

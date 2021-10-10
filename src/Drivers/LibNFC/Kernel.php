@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace NFC\Drivers\LibNFC;
 
 use NFC\Contexts\FFIContextProxy;
-use NFC\Drivers\LibNFC;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
 use NFC\Drivers\LibNFC\Headers\NFCTypesConstants;
