@@ -7,12 +7,12 @@ namespace NFC;
 class NFCDeviceInfo
 {
     protected string $connectionTarget;
-    protected NFCDeviceInterface $nfcDevice;
+    protected NFCDeviceInterface $NFCDevice;
 
-    public function __construct(string $connectionTarget, NFCDeviceInterface $nfcDevice)
+    public function __construct(string $connectionTarget, NFCDeviceInterface $NFCDevice)
     {
         $this->connectionTarget = $connectionTarget;
-        $this->nfcDevice = $nfcDevice;
+        $this->NFCDevice = $NFCDevice;
     }
 
     public function getConnectionTarget(): string
@@ -22,11 +22,11 @@ class NFCDeviceInfo
 
     public function getDeviceName(): string
     {
-        return $this->nfcDevice->getDeviceName();
+        return $this->NFCDevice->getDeviceName();
     }
 
     public function getDevice(): NFCDeviceInterface
     {
-        return $this->nfcDevice;
+        return $this->NFCDevice;
     }
 }

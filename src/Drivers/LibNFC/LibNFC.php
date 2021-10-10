@@ -119,11 +119,11 @@ class LibNFC implements DriverInterface
         $exceptions = [];
         try {
             /**
-             * @var NFCDeviceInfo $nfcDevice
+             * @var NFCDeviceInfo $NFCDevice
              */
-            foreach ($this->getDevices() as $nfcDevice) {
-                if (strpos($nfcDevice->getDeviceName(), $deviceName) !== false) {
-                    return $nfcDevice->getDevice();
+            foreach ($this->getDevices() as $NFCDevice) {
+                if (strpos($NFCDevice->getDeviceName(), $deviceName) !== false) {
+                    return $NFCDevice->getDevice();
                 }
             }
         } catch (NFCDeviceException $e) {
@@ -186,7 +186,7 @@ class LibNFC implements DriverInterface
             }
 
             try {
-                if (($nfcTargetContext = $this->poll($device, $modulations)) === null) {
+                if (($NFCTargetContext = $this->poll($device, $modulations)) === null) {
                     $this->NFCContext->getEventManager()
                         ->dispatchEvent(
                             NFCEventManager::EVENT_MISSING,
@@ -199,7 +199,7 @@ class LibNFC implements DriverInterface
                 $target = new NFCTarget(
                     $this->NFCContext,
                     $device,
-                    $nfcTargetContext
+                    $NFCTargetContext
                 );
 
                 $info = [
@@ -295,7 +295,7 @@ class LibNFC implements DriverInterface
 
     public function poll(NFCDeviceInterface $device, NFCModulations $modulations): ?ContextProxyInterface
     {
-        $nfcTargetContext = $this
+        $NFCTargetContext = $this
             ->NFCContext->getFFI()
             ->new('nfc_target');
 
@@ -307,14 +307,14 @@ class LibNFC implements DriverInterface
                 count($modulations),
                 $this->pollingContinuations,
                 $this->pollingInterval,
-                \FFI::addr($nfcTargetContext),
+                \FFI::addr($NFCTargetContext),
             );
 
         if ($result <= 0) {
             return null;
         }
 
-        return new NFCTargetContextProxy($nfcTargetContext);
+        return new NFCTargetContextProxy($NFCTargetContext);
     }
 
     /**
@@ -352,7 +352,7 @@ class LibNFC implements DriverInterface
                 array_map(
                     function (string $connectionTarget) use ($includeCannotOpenDevices) {
                         try {
-                            $nfcDevice = (new NFCDevice($this->NFCContext))
+                            $NFCDevice = (new NFCDevice($this->NFCContext))
                                 ->open($connectionTarget, $includeCannotOpenDevices);
                         } catch (NFCDeviceException $e) {
                             return null;
@@ -360,7 +360,7 @@ class LibNFC implements DriverInterface
 
                         return new NFCDeviceInfo(
                             $connectionTarget,
-                            $nfcDevice
+                            $NFCDevice
                         );
                     },
                     $data,

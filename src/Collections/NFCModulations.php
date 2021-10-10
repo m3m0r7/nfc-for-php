@@ -25,17 +25,17 @@ class NFCModulations extends Collection
             return $this->cdataStructure;
         }
 
-        $nfcModulations = $context
+        $NFCModulations = $context
             ->new('nfc_modulation[' . count($this->items) . ']');
 
         /**
          * @var NFCModulation $modulation
          */
         foreach ($this->items as $index => $modulation) {
-            $nfcModulations[$index]->nmt = $modulation->getModulationType();
-            $nfcModulations[$index]->nbr = $modulation->getBaudRate();
+            $NFCModulations[$index]->nmt = $modulation->getModulationType();
+            $NFCModulations[$index]->nbr = $modulation->getBaudRate();
         }
 
-        return $this->cdataStructure = $nfcModulations;
+        return $this->cdataStructure = $NFCModulations;
     }
 }

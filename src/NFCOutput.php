@@ -15,7 +15,7 @@ class NFCOutput
         $this->context = $NFCContext;
     }
 
-    public function outputNFCTargetContext(NFCTargetInterface $nfcTarget): string
+    public function outputNFCTargetContext(NFCTargetInterface $NFCTarget): string
     {
         $string = $this
             ->context
@@ -27,7 +27,7 @@ class NFCOutput
             ->getFFI()
             ->str_nfc_target(
                 \FFI::addr($string),
-                \FFI::addr($nfcTarget->getNFCTargetContext()->getContext()),
+                \FFI::addr($NFCTarget->getNFCTargetContext()->getContext()),
                 true
             );
 

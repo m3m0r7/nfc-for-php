@@ -24,15 +24,15 @@ use NFC\NFCTargetInterface;
 class NFCTarget implements NFCTargetInterface
 {
     protected NFCContext $context;
-    protected ContextProxyInterface $nfcTargetContext;
+    protected ContextProxyInterface $NFCTargetContext;
     protected NFCDeviceInterface $device;
     protected ?NFCTargetAttributeInterface $attribute = null;
 
-    public function __construct(NFCContext $context, NFCDeviceInterface $device, ContextProxyInterface $nfcTargetContext)
+    public function __construct(NFCContext $context, NFCDeviceInterface $device, ContextProxyInterface $NFCTargetContext)
     {
         $this->context = $context;
         $this->device = $device;
-        $this->nfcTargetContext = $nfcTargetContext;
+        $this->NFCTargetContext = $NFCTargetContext;
 
         $this->fillNFCTargetForPHPFFIBug();
     }
@@ -41,7 +41,7 @@ class NFCTarget implements NFCTargetInterface
     {
         // struct/union implementation are incomplete.
         // The PHP cannot overwrite structure instantiated on the PHP scope.
-        if ($this->nfcTargetContext->nm->nmt !== 0) {
+        if ($this->NFCTargetContext->nm->nmt !== 0) {
             return;
         }
 
@@ -60,21 +60,21 @@ class NFCTarget implements NFCTargetInterface
         // Find from modulation types
         foreach ($modulationTypes->getEnums() as $value) {
             if ($this->context->getFFI()->str_nfc_modulation_type($value) === $modulationTypeName) {
-                $this->nfcTargetContext->nm->nmt = $value;
+                $this->NFCTargetContext->nm->nmt = $value;
                 break;
             }
         }
 
-        if ($this->nfcTargetContext->nm->nmt !== $modulationTypes->NMT_DEP) {
+        if ($this->NFCTargetContext->nm->nmt !== $modulationTypes->NMT_DEP) {
             foreach ($baudRates->getEnums() as $value) {
                 if ($this->context->getFFI()->str_nfc_baud_rate($value) === $baudRateOrModeName) {
-                    $this->nfcTargetContext->nm->nbr = $value;
+                    $this->NFCTargetContext->nm->nbr = $value;
                     break;
                 }
             }
         }
 
-        if ($this->nfcTargetContext->nm->nmt === 0 || $this->nfcTargetContext->nm->nbr === 0) {
+        if ($this->NFCTargetContext->nm->nmt === 0 || $this->NFCTargetContext->nm->nbr === 0) {
             throw new NFCTargetException('Unknown NFC target type');
         }
     }
@@ -102,7 +102,7 @@ class NFCTarget implements NFCTargetInterface
         return $this
             ->context
             ->getFFI()
-            ->str_nfc_modulation_type($this->nfcTargetContext->nm->nmt);
+            ->str_nfc_modulation_type($this->NFCTargetContext->nm->nmt);
     }
 
     public function getBaudRate(): string
@@ -110,19 +110,19 @@ class NFCTarget implements NFCTargetInterface
         return $this
             ->context
             ->getFFI()
-            ->str_nfc_baud_rate($this->nfcTargetContext->nm->nbr);
+            ->str_nfc_baud_rate($this->NFCTargetContext->nm->nbr);
     }
 
     public function getNFCTargetContext(): ContextProxyInterface
     {
-        return $this->nfcTargetContext;
+        return $this->NFCTargetContext;
     }
 
     public function getAttributeAccessor(): NFCTargetAttributeInterface
     {
         $modulationTypes = $this->context->getModulationsTypes();
 
-        switch ($this->nfcTargetContext->nm->nmt) {
+        switch ($this->NFCTargetContext->nm->nmt) {
             case $modulationTypes->NMT_ISO14443A:
                 return $this->attribute ??= new ISO14443A($this);
             case $modulationTypes->NMT_JEWEL:
@@ -145,6 +145,6 @@ class NFCTarget implements NFCTargetInterface
                 return $this->attribute ??= new ISO14443BICLASS($this);
         }
 
-        throw new NFCTargetException("Unknown target [{$this->nfcTargetContext->nm->nmt}, {$this->nfcTargetContext->nm->nbr}]");
+        throw new NFCTargetException("Unknown target [{$this->NFCTargetContext->nm->nmt}, {$this->NFCTargetContext->nm->nbr}]");
     }
 }

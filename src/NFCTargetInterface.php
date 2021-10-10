@@ -9,7 +9,7 @@ use NFC\Contexts\ContextProxyInterface;
 
 interface NFCTargetInterface
 {
-    public function __construct(NFCContext $context, NFCDeviceInterface $device, ContextProxyInterface $nfcTargetContext);
+    public function __construct(NFCContext $context, NFCDeviceInterface $device, ContextProxyInterface $NFCTargetContext);
     public function getNFCContext(): NFCContext;
     public function getNFCDevice(): NFCDeviceInterface;
     public function __toString(): string;

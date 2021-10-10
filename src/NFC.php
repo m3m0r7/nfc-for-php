@@ -9,7 +9,7 @@ namespace NFC;
  */
 class NFC
 {
-    protected NFCInterface $nfc;
+    protected NFCInterface $NFC;
 
     public function __construct(string $NFCDriverClassName = \NFC\Drivers\LibNFC\Kernel::class, ...$parameters)
     {

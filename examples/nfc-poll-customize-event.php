@@ -5,12 +5,12 @@ require __DIR__ . '/../vendor/autoload.php';
 use NFC\NFC;
 use NFC\NFCEventManager;
 
-$nfc = new NFC(
+$NFC = new NFC(
     \NFC\Drivers\LibNFC\Kernel::class,
     '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
 );
 
-$context = $nfc->createContext(
+$context = $NFC->createContext(
     (new \NFC\NFCEventManager())
         ->listen(
             NFCEventManager::EVENT_OPEN,
@@ -32,14 +32,14 @@ $context = $nfc->createContext(
         )
         ->listen(
             NFCEventManager::EVENT_TOUCH,
-            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
-                echo "{$nfcTargetContext->getModulationType()} ({$nfcTargetContext->getBaudRate()}): {$nfcTargetContext->getAttributeAccessor()->getID()}\n";
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $NFCTargetContext) {
+                echo "{$NFCTargetContext->getModulationType()} ({$NFCTargetContext->getBaudRate()}): {$NFCTargetContext->getAttributeAccessor()->getID()}\n";
             }
         )
         ->listen(
             NFCEventManager::EVENT_RELEASE,
-            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
-                echo "Release: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getModulationType()})\n";
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $NFCTargetContext) {
+                echo "Release: {$NFCTargetContext->getAttributeAccessor()->getID()}({$NFCTargetContext->getModulationType()})\n";
             }
         )
         ->listen(

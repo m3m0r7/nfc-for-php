@@ -6,11 +6,11 @@ use NFC\NFC;
 use NFC\NFCOutput;
 use NFC\NFCEventManager;
 
-$nfc = new NFC(
+$NFC = new NFC(
     \NFC\Drivers\LibNFC\Kernel::class,
     '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
 );
-$context = $nfc->createContext(
+$context = $NFC->createContext(
     (new \NFC\NFCEventManager())
         ->listen(
             NFCEventManager::EVENT_OPEN,
@@ -32,8 +32,8 @@ $context = $nfc->createContext(
         )
         ->listen(
             NFCEventManager::EVENT_TOUCH,
-            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $nfcTargetContext) {
-                echo ((string) $nfcTargetContext) . "\n";
+            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $NFCTargetContext) {
+                echo ((string) $NFCTargetContext) . "\n";
             }
         )
 );
