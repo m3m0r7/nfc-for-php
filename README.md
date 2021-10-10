@@ -52,5 +52,9 @@ $ php examples/nfc-poll-simple.php
 
 <img src="images/example.jpg">
 
+# How to use
+
+- See examples
+
 # License
 - MIT
