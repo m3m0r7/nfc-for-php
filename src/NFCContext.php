@@ -179,6 +179,10 @@ class NFCContext
             $exceptions[] = $e;
         }
 
+        if (count($exceptions) === 0) {
+            throw new NFCException('Unable to find available device.');
+        }
+
         throw new NFCException(
             implode(
                 "\n",
