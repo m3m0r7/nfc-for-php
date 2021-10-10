@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace NFC;
 
 use FFI\CData;
+use NFC\Headers\NFCInternal;
 
 class NFCContext
 {
@@ -106,7 +107,7 @@ class NFCContext
     /**
      * @return array<NFCDeviceInfo>
      */
-    public function getDevices(int $maxFetchDevices = 128): array
+    public function getDevices(int $maxFetchDevices = NFCInternal::DEVICE_PORT_LENGTH): array
     {
         $this->validateContextOpened();
 
