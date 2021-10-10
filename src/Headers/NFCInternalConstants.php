@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace NFC\Headers;
 
-class NFCInternal extends HeaderEnum
+class NFCInternalConstants extends ConstantsEnum
 {
     public const DEVICE_NAME_LENGTH = 256;
     public const DEVICE_PORT_LENGTH = 64;

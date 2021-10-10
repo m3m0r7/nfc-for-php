@@ -5,15 +5,16 @@ namespace NFC;
 
 use FFI\CData;
 use NFC\Contexts\FFIContextProxy;
-use NFC\Headers\NFCInternal;
-use NFC\Headers\NFCTypes;
+use NFC\Headers\NFCConstants;
+use NFC\Headers\NFCInternalConstants;
+use NFC\Headers\NFCTypesConstants;
 
 class NFC
 {
     protected array $headers = [
-        [__DIR__ . '/Headers/cdef/nfc-types.h', [NFCTypes::class]],
-        [__DIR__ . '/Headers/cdef/nfc-internal.h', [NFCInternal::class]],
-        [__DIR__ . '/Headers/cdef/nfc.h'],
+        [__DIR__ . '/Headers/cdef/nfc-types.h', [NFCTypesConstants::class]],
+        [__DIR__ . '/Headers/cdef/nfc-internal.h', [NFCInternalConstants::class]],
+        [__DIR__ . '/Headers/cdef/nfc.h', [NFCConstants::class]],
     ];
 
     protected array $autoScanLocationsForUnix = [

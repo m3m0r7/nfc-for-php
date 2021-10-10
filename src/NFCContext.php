@@ -8,7 +8,7 @@ use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
 use NFC\Contexts\NFCTargetContextProxy;
-use NFC\Headers\NFCInternal;
+use NFC\Headers\NFCInternalConstants;
 
 class NFCContext
 {
@@ -114,7 +114,7 @@ class NFCContext
     /**
      * @return array<NFCDeviceInfo>
      */
-    public function getDevices(int $maxFetchDevices = NFCInternal::DEVICE_PORT_LENGTH): array
+    public function getDevices(int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH): array
     {
         $this->validateContextOpened();
 
