@@ -1,12 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC;
+namespace NFC\Util;
 
 use FFI\CData;
 use NFC\Collections\NFCModulations;
+use NFC\NFCBaudRates;
+use NFC\NFCContext;
+use NFC\NFCModulationTypes;
 
-class NFCPredefinedModulations
+class PredefinedModulations
 {
     protected NFCContext $context;
     protected NFCModulationTypes $modulationTypes;

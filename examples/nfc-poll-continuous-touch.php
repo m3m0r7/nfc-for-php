@@ -24,6 +24,6 @@ $context
     ->enableContinuousTouchAdjustment(false)
     ->start(
         $context->findDeviceNameContain('Sony'),
-        (new \NFC\NFCPredefinedModulations($context))
+        (new \NFC\Util\PredefinedModulations($context))
             ->all(),
     );
