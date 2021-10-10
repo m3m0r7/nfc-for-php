@@ -34,9 +34,9 @@ $context = $nfc->createContext(
             }
         )
         ->listen(
-            NFCEventManager::EVENT_LEAVE,
+            NFCEventManager::EVENT_RELEASE,
             function (\NFC\NFCContext $context, \NFC\NFCTarget $nfcTargetContext) {
-                echo "Leave: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
+                echo "Release: {$nfcTargetContext->getAttributeAccessor()->getID()}({$nfcTargetContext->getTargetName()})\n";
             }
         )
         ->listen(

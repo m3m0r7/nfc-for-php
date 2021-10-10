@@ -9,7 +9,7 @@ class NFCEventManager
     public const EVENT_CLOSE = 'close';
     public const EVENT_START = 'start';
     public const EVENT_TOUCH = 'touch';
-    public const EVENT_LEAVE = 'leave';
+    public const EVENT_RELEASE = 'release';
     public const EVENT_MISSING = 'missing';
     public const EVENT_ERROR = 'error';
 
@@ -18,7 +18,7 @@ class NFCEventManager
         self::EVENT_CLOSE => [],
         self::EVENT_START => [],
         self::EVENT_TOUCH => [],
-        self::EVENT_LEAVE => [],
+        self::EVENT_RELEASE => [],
         self::EVENT_MISSING => [],
         self::EVENT_ERROR => [],
     ];

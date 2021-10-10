@@ -8,6 +8,7 @@ use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
 use NFC\Contexts\NFCTargetContextProxy;
+use NFC\Headers\NFCConstants;
 use NFC\Headers\NFCInternalConstants;
 
 class NFCContext
@@ -17,6 +18,7 @@ class NFCContext
 
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
+    protected int $waitPresentationReleaseInterval = 250;
     protected bool $isOpened = false;
     protected bool $enableContinuousTouchAdjustment = true;
 
@@ -104,6 +106,12 @@ class NFCContext
         return $this;
     }
 
+    public function setWaitPresentationReleaseInterval(int $ms): self
+    {
+        $this->waitPresentationReleaseInterval = $ms;
+        return $this;
+    }
+
     public function getNFCContext(): CData
     {
         $this->validateContextOpened();
@@ -114,7 +122,7 @@ class NFCContext
     /**
      * @return array<NFCDeviceInfo>
      */
-    public function getDevices(int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH): array
+    public function getDevices(int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH, bool $includeCannotOpenDevices = true): array
     {
         $this->validateContextOpened();
 
@@ -142,10 +150,10 @@ class NFCContext
         return array_values(
             array_filter(
                 array_map(
-                    function (string $connectionTarget) {
+                    function (string $connectionTarget) use ($includeCannotOpenDevices) {
                         try {
                             $nfcDevice = (new NFCDevice($this))
-                                ->open($connectionTarget);
+                                ->open($connectionTarget, $includeCannotOpenDevices);
                         } catch (NFCDeviceException $e) {
                             return null;
                         }
@@ -228,7 +236,21 @@ class NFCContext
         $touched = null;
 
         while (true) {
+            switch ($device->getLastErrorCode()) {
+                case NFCConstants::NFC_ETIMEOUT: // Device not configured (This is shown when you did plug-out the NFC device)
+                case NFCConstants::NFC_ERFTRANS:
+                case NFCConstants::NFC_EMFCAUTHFAIL:
+                case NFCConstants::NFC_ESOFT:
+                case NFCConstants::NFC_ECHIP:
+                case NFCConstants::NFC_EOPABORTED:
+                    throw new NFCException(
+                        "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
+                    );
+                    break;
+            }
+
             try {
+
                 if (($nfcTargetContext = $this->poll($device, $modulations)) === null) {
                     $this->eventManager
                         ->dispatchEvent(
@@ -263,29 +285,37 @@ class NFCContext
                     }
                 }
 
-                if (!$isTouchedMoment) {
+                if ($isTouchedMoment) {
+                    continue;
+                }
+
+                $this->eventManager
+                    ->dispatchEvent(
+                        NFCEventManager::EVENT_TOUCH,
+                        $this,
+                        $target
+                    );
+
+                if ($this->enableContinuousTouchAdjustment) {
+                    $touched = $info + [
+                        'expires' => time() + $this->continuousTouchAdjustmentExpires,
+                    ];
+                }
+
+                try {
+                    while ($this->isPresent($device, $target)) {
+                        usleep($this->waitPresentationReleaseInterval);
+                    }
+
                     $this->eventManager
                         ->dispatchEvent(
-                            NFCEventManager::EVENT_TOUCH,
+                            NFCEventManager::EVENT_RELEASE,
                             $this,
                             $target
                         );
-
-                    if ($this->enableContinuousTouchAdjustment) {
-                        $touched = $info + [
-                            'expires' => time() + $this->continuousTouchAdjustmentExpires,
-                        ];
-                    }
+                } catch (\Throwable $e) {
+                    throw $e;
                 }
-//
-//                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
-//                        usleep(250);
-//                    }
-//
-//                    $this->dispatchEvent(
-//                        'leave',
-//                        $target
-//                    );
             } catch (\Throwable $e) {
                 $this->eventManager
                     ->dispatchEvent(
@@ -295,6 +325,24 @@ class NFCContext
                     );
             }
         }
+    }
+
+    public function isPresent(NFCDevice $device, NFCTarget $target): bool
+    {
+        $isPresent = $this->ffi
+            ->nfc_initiator_target_is_present(
+                $device->getDeviceContext(),
+                \FFI::addr($target->getNFCTargetContext()->getContext()
+                )
+            ) === 0;
+        
+        if ($device->getLastErrorCode() !== NFCConstants::NFC_ETGRELEASED) {
+            throw new NFCException(
+                "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
+            );
+        }
+
+        return $isPresent;
     }
 
     public function poll(NFCDevice $device, NFCModulations $modulations): ?ContextProxyInterface

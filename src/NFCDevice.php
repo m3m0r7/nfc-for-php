@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace NFC;
 
 use FFI\CData;
+use NFC\Headers\NFCConstants;
 
 class NFCDevice
 {
@@ -28,11 +29,13 @@ class NFCDevice
         $this->deviceContext = null;
     }
 
-    public function open(?string $connection = null): self
+    public function open(?string $connection = null, bool $forceOpen = false): self
     {
         if ($this->deviceContext !== null) {
             throw new NFCDeviceException('NFC device already opened.');
         }
+
+        $this->connection = $connection;
 
         $this->deviceContext = $this
             ->context
@@ -43,6 +46,10 @@ class NFCDevice
             );
 
         if ($this->deviceContext === null) {
+            if ($forceOpen === true) {
+                return $this;
+            }
+
             throw new NFCDeviceException(
                 "Unable to open NFC device" . ($connection !== null ? " [{$connection}]" : '')
             );
@@ -67,13 +74,47 @@ class NFCDevice
 
     public function getDeviceName(): string
     {
-        $this->validateDeviceOpened();
+        if ($this->deviceContext === null) {
+            return 'Unknown device';
+        }
 
         return $this->context
             ->getFFI()
             ->nfc_device_get_name(
                 $this->deviceContext
             );
+    }
+
+    public function isOpened(): bool
+    {
+        return $this->deviceContext !== null;
+    }
+
+    public function getLastErrorCode(): int
+    {
+        $this->validateDeviceOpened();
+
+        return $this->context
+            ->getFFI()
+            ->nfc_device_get_last_error(
+                $this->deviceContext
+            );
+    }
+
+    public function getLastErrorName(): string
+    {
+        static $constants;
+        $lastErrorCode = $this->getLastErrorCode();
+
+        $constants ??= (new \ReflectionClass(NFCConstants::class))
+            ->getConstants();
+
+        return array_search($lastErrorCode, $constants, true) ?: 'UNKNOWN ERROR';
+    }
+
+    public function getConnection(): string
+    {
+        return $this->connection;
     }
 
     public function getDeviceContext()
