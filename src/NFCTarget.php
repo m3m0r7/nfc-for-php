@@ -90,9 +90,7 @@ class NFCTarget
         return $this
             ->context
             ->getOutput()
-            ->outputNFCTargetContext(
-                $this->nfcTargetContext
-            );
+            ->outputNFCTargetContext($this);
     }
 
     public function getTargetName(): string
