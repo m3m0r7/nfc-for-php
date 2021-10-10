@@ -16,6 +16,7 @@ use NFC\Drivers\LibNFC\Attributes\Jewel;
 use NFC\Attributes\NFCTargetAttributeInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\NFCContext;
+use NFC\NFCTargetException;
 use NFC\NFCTargetInterface;
 
 class NFCTarget implements NFCTargetInterface
