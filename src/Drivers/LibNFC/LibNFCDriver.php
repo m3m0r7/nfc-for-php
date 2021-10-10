@@ -22,6 +22,7 @@ use NFC\NFCEventManager;
 use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
+use NFC\NFCTargetTimeoutException;
 
 class LibNFCDriver implements DriverInterface
 {
@@ -35,6 +36,7 @@ class LibNFCDriver implements DriverInterface
     protected string $NFCTargetClassName = NFCTarget::class;
 
     protected int $waitPresentationReleaseInterval = 250;
+    protected int $waitDidNotReleaseTimeout = 30;
 
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
@@ -247,8 +249,14 @@ class LibNFCDriver implements DriverInterface
                 }
 
                 try {
+                    $timeout = time() + $this->waitDidNotReleaseTimeout;
                     while (!$this->isPresent($device, $target)) {
                         usleep($this->waitPresentationReleaseInterval);
+                        if (time() < $timeout) {
+                            throw new NFCTargetTimeoutException(
+                                'Timed out because it has not been released for a long time'
+                            );
+                        }
                     }
 
                     $this->NFCContext
