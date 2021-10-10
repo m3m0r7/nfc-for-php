@@ -17,6 +17,7 @@ use NFC\NFCContext;
 use NFC\NFCDeviceException;
 use NFC\NFCDeviceInfo;
 use NFC\NFCDeviceInterface;
+use NFC\NFCDeviceNotFoundException;
 use NFC\NFCEventManager;
 use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
@@ -129,7 +130,7 @@ class LibNFCDriver implements DriverInterface
         }
 
         if (count($exceptions) === 0) {
-            throw new NFCException('Unable to find available device');
+            throw new NFCDeviceNotFoundException('Unable to find available device');
         }
 
         throw new NFCException(

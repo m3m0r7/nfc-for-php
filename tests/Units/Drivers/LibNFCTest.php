@@ -9,6 +9,7 @@ use Monolog\Logger;
 use NFC\Drivers\LibNFC\NFCDevice;
 use NFC\NFC;
 use NFC\NFCContext;
+use NFC\NFCDeviceNotFoundException;
 use NFC\Util\LoggerStackHandler;
 use PHPUnit\Framework\TestCase;
 use Tests\Mock\MockedLibNFCKernel;
@@ -45,6 +46,20 @@ class LibNFCTest extends TestCase
         $this->assertSame('dummy-1', $devices[0]->getDevice()->getConnection());
         $this->assertSame('dummy-device', $devices[1]->getDevice()->getDeviceName());
         $this->assertSame('dummy-2', $devices[1]->getDevice()->getConnection());
+    }
+
+    public function testFindDevice()
+    {
+        $device = $this->NFCContext->findDeviceNameContain('dummy-de');
+
+        $this->assertSame('dummy-device', $device->getDeviceName());
+        $this->assertSame('dummy-1', $device->getConnection());
+    }
+
+    public function testFindDeviceThenNotFound()
+    {
+        $this->expectException(NFCDeviceNotFoundException::class);
+        $this->NFCContext->findDeviceNameContain('dummy-device-not-found');
     }
 
     public function testStart()
