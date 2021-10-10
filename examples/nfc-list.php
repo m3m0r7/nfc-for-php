@@ -10,6 +10,6 @@ $context = $nfc->createContext();
 /**
  * @var \NFC\NFCDeviceInfo $device
  */
-foreach ($context->getDevices() as $device) {
+foreach ($context->getDevices(true) as $device) {
     echo "{$device->getDeviceName()} [{$device->getConnectionTarget()}]\n";
 }

@@ -19,6 +19,7 @@ class NFCContext
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
     protected int $waitPresentationReleaseInterval = 250;
+    protected int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH;
     protected bool $isOpened = false;
     protected bool $enableContinuousTouchAdjustment = true;
 
@@ -112,6 +113,12 @@ class NFCContext
         return $this;
     }
 
+    public function setMaxFetchDevices(int $devices): self
+    {
+        $this->maxFetchDevices = $devices;
+        return $this;
+    }
+
     public function getNFCContext(): CData
     {
         $this->validateContextOpened();
@@ -122,25 +129,25 @@ class NFCContext
     /**
      * @return array<NFCDeviceInfo>
      */
-    public function getDevices(int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH, bool $includeCannotOpenDevices = true): array
+    public function getDevices(bool $includeCannotOpenDevices = false): array
     {
         $this->validateContextOpened();
 
         $connectionTargets = $this
             ->ffi
-            ->new("nfc_connstring[{$maxFetchDevices}]");
+            ->new("nfc_connstring[{$this->maxFetchDevices}]");
 
         $this
             ->ffi
             ->nfc_list_devices(
                 $this->context,
                 $connectionTargets,
-                $maxFetchDevices
+                $this->maxFetchDevices
             );
 
         $data = [];
 
-        for ($i = 0; $i < $maxFetchDevices; $i++) {
+        for ($i = 0; $i < $this->maxFetchDevices; $i++) {
             $data[$i] = \FFI::string($connectionTargets[$i]);
             if ($data[$i] === '') {
                 unset($data[$i]);
