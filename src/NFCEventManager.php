@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NFC;
@@ -43,5 +44,4 @@ class NFCEventManager
             $callback(...$parameters);
         }
     }
-
 }

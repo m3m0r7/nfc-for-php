@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NFC;
@@ -120,4 +121,3 @@ class NFCContext
         return $this->nfc;
     }
 }
-

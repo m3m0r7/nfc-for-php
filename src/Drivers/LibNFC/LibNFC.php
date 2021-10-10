@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC;
@@ -163,7 +164,6 @@ class LibNFC implements DriverInterface
             }
 
             try {
-
                 if (($nfcTargetContext = $this->poll($device, $modulations)) === null) {
                     $this->NFCContext->getEventManager()
                         ->dispatchEvent(
