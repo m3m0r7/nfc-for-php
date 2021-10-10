@@ -55,12 +55,8 @@ class Kernel implements NFCInterface
         }
     }
 
-    public function createContext(?NFCEventManager $eventManager = null, string $driverClassName = null): NFCContext
+    public function createContext(?NFCEventManager $eventManager = null): NFCContext
     {
-        if ($driverClassName === null) {
-            $driverClassName = LibNFC::class;
-        }
-
         $libraryPath = null;
         foreach ($this->libraryPaths as $path) {
             if (is_file($path)) {
@@ -113,7 +109,7 @@ class Kernel implements NFCInterface
                 )
             ),
             $eventManager ?? new NFCEventManager(),
-            $driverClassName,
+            LibNFC::class,
         );
     }
 
