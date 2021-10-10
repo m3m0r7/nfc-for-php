@@ -1,4 +1,4 @@
-# What is libnfc-for-php?
+# What is nfc-for-php?
 
 This library is a toy for me. You can read NFC with libnfc written in PHP.
 
@@ -34,7 +34,7 @@ $ brew install libnfc
 2. Install this library
 
 ```
-$ composer require m3m0r7/libnfc-for-php
+$ composer require m3m0r7/nfc-for-php
 ```
 
 3. Connect NFC Device into your machine.

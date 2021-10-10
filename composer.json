@@ -1,5 +1,5 @@
 {
-  "name": "m3m0r7/libnfc-for-php",
+  "name": "m3m0r7/nfc-for-php",
   "description": "NFC Reader with the libnfc written in PHP",
   "type": "library",
   "license": "MIT",
