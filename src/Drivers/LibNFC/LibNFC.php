@@ -260,7 +260,6 @@ class LibNFC implements DriverInterface
                         ->getNFC()
                         ->getLogger()
                         ->info("Released target: {$target->getAttributeAccessor()->getID()}");
-
                 } catch (\Throwable $e) {
                     throw $e;
                 }
