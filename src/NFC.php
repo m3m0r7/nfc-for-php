@@ -11,7 +11,7 @@ use NFC\Headers\NFCInternalConstants;
 use NFC\Headers\NFCLogConstants;
 use NFC\Headers\NFCTypesConstants;
 
-class NFC
+class NFC implements NFCInterface
 {
     protected array $headers = [
         [__DIR__ . '/Headers/cdef/nfc-types.h', [NFCTypesConstants::class]],
@@ -53,8 +53,12 @@ class NFC
         }
     }
 
-    public function createContext(?NFCEventManager $eventManager = null, string $driverClassName = LibNFC::class): NFCContext
+    public function createContext(?NFCEventManager $eventManager = null, string $driverClassName = null): NFCContext
     {
+        if ($driverClassName === null) {
+            $driverClassName = LibNFC::class;
+        }
+
         $libraryPath = null;
         foreach ($this->libraryPaths as $path) {
             if (is_file($path)) {
@@ -72,6 +76,7 @@ class NFC
         }
 
         return $this->context = new NFCContext(
+            $this,
             new FFIContextProxy(
                 \FFI::cdef(
                     implode(

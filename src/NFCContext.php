@@ -7,14 +7,11 @@ use FFI\CData;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
-use NFC\Contexts\NFCTargetContextProxy;
 use NFC\Drivers\DriverInterface;
-use NFC\Headers\NFCConstants;
-use NFC\Headers\NFCInternalConstants;
 
 class NFCContext
 {
-    protected NFC $nfc;
+    protected NFCInterface $nfc;
     protected FFIContextProxy $ffi;
     protected NFCOutput $output;
     protected DriverInterface $driver;
@@ -25,7 +22,7 @@ class NFCContext
         $this->driver->close();
     }
 
-    public function __construct(NFC $nfc, ContextProxyInterface $ffi, NFCEventManager $eventManager, string $driverClassName)
+    public function __construct(NFCInterface $nfc, ContextProxyInterface $ffi, NFCEventManager $eventManager, string $driverClassName)
     {
         /**
          * @var FFIContextProxy $ffi
