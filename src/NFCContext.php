@@ -19,7 +19,7 @@ class NFCContext
 
     public function __destruct()
     {
-        $this->driver->close();
+        $this->close();
     }
 
     public function __construct(NFCInterface $nfc, ContextProxyInterface $ffi, NFCEventManager $eventManager, string $driverClassName)
@@ -32,6 +32,32 @@ class NFCContext
         $this->eventManager = $eventManager;
         $this->output = new NFCOutput($this);
         $this->driver = new $driverClassName($this);
+    }
+
+    public function close(): void
+    {
+        try {
+            $this->driver->close();
+        } finally {
+            $this->getEventManager()
+                ->dispatchEvent(
+                    NFCEventManager::EVENT_CLOSE,
+                    $this,
+                );
+        }
+    }
+
+    public function open(): void
+    {
+        try {
+            $this->driver->open();
+        } finally {
+            $this->getEventManager()
+                ->dispatchEvent(
+                    NFCEventManager::EVENT_OPEN,
+                    $this,
+                );
+        }
     }
 
     public function getFFI(): ContextProxyInterface

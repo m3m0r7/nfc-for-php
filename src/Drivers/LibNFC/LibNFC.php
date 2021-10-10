@@ -47,16 +47,8 @@ class LibNFC implements DriverInterface
         putenv("LIBNFC_LOG_LEVEL={$this->libNFCLogLevel}");
 
         $this->context = $this->NFCContext->getFFI()->new('nfc_context *');
-
         $this->NFCContext->getFFI()->nfc_init(\FFI::addr($this->context));
-
         $this->isOpened = true;
-
-        $this->NFCContext->getEventManager()
-            ->dispatchEvent(
-                NFCEventManager::EVENT_OPEN,
-                $this->NFCContext,
-            );
 
         return $this;
     }
@@ -89,12 +81,6 @@ class LibNFC implements DriverInterface
         $this->validateContextOpened();
 
         $this->NFCContext->getFFI()->nfc_exit($this->context);
-        $this->NFCContext->getEventManager()
-            ->dispatchEvent(
-                NFCEventManager::EVENT_CLOSE,
-                $this->NFCContext,
-            );
-
         $this->context = null;
         $this->isOpened = false;
     }
@@ -366,7 +352,7 @@ class LibNFC implements DriverInterface
     {
         // Open context automatically.
         if (!$this->isOpened) {
-            $this->open();
+            $this->NFCContext->open();
         }
 
         if ($this->context === null) {
