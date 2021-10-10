@@ -23,7 +23,9 @@ class LibNFCTest extends TestCase
     {
         $this->NFC = new NFC(
             MockedLibNFCKernel::class,
-            '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
+            PHP_OS === 'Darwin'
+                ? '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
+                : null,
         );
 
         $logger = new Logger(__CLASS__);
