@@ -42,8 +42,4 @@ $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
 $context
-    ->start(
-        $context->findDeviceNameContain('Sony'),
-        (new \NFC\Util\PredefinedModulations($context))
-            ->all(),
-    );
+    ->start($context->findDeviceNameContain('Sony'));

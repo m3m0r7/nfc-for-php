@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace NFC\Contexts;
 
-use FFI\CData;
-use NFC\NFCTarget;
-
 /**
  * @mixin \FFI
  */
@@ -22,6 +19,11 @@ class FFIContextProxy implements ContextProxyInterface
     public function __get($name)
     {
         return $this->ffi->{$name} ?? null;
+    }
+
+    public function getFFI(): \FFI
+    {
+        return $this->ffi;
     }
 
     public function __call($name, $arguments)

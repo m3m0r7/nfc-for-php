@@ -61,7 +61,7 @@ class EmulateDriver implements DriverInterface
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
-        return true;
+        return false;
     }
 
     public function getBaudRates(): NFCBaudRatesInterface

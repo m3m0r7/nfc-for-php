@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC;
 
-use FFI\CData;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCContextContextProxy;
 use NFC\Contexts\NFCTargetContextProxy;
 use NFC\Drivers\DriverInterface;
-use NFC\Drivers\LibNFC\NFCDevice;
-use NFC\Drivers\LibNFC\NFCTarget;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
 use NFC\Drivers\LibNFC\Headers\NFCLogConstants;
@@ -25,7 +22,7 @@ use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 
-class LibNFC implements DriverInterface
+class LibNFCDriver implements DriverInterface
 {
     protected ?ContextProxyInterface $context = null;
     protected ?NFCContext $NFCContext = null;
@@ -34,6 +31,7 @@ class LibNFC implements DriverInterface
     protected int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH;
     protected bool $isOpened = false;
     protected int $libNFCLogLevel = NFCLogConstants::NFC_LOG_PRIORITY_NONE;
+    protected string $NFCTargetClassName = NFCTarget::class;
 
     protected int $waitPresentationReleaseInterval = 250;
 
@@ -43,8 +41,8 @@ class LibNFC implements DriverInterface
     // second
     protected int $continuousTouchAdjustmentExpires = 10;
 
-    protected EmulateNFCBaudRates $baudRates;
-    protected EmulateModulationTypes $modulationTypes;
+    protected NFCBaudRatesInterface $baudRates;
+    protected NFCModulationTypesInterface $modulationTypes;
 
     public function open(): self
     {
@@ -73,8 +71,8 @@ class LibNFC implements DriverInterface
     {
         $this->NFCContext = $context;
 
-        $this->baudRates = new EmulateNFCBaudRates($this->NFCContext->getFFI());
-        $this->modulationTypes = new EmulateModulationTypes($this->NFCContext->getFFI());
+        $this->baudRates = new NFCBaudRates($this->NFCContext->getFFI());
+        $this->modulationTypes = new NFCModulationTypes($this->NFCContext->getFFI());
     }
 
     public function enableContinuousTouchAdjustment(bool $which): self
@@ -150,11 +148,13 @@ class LibNFC implements DriverInterface
         $this->validateContextOpened();
 
         if ($device === null) {
-            $device = $this->getDevices()[0] ?? null;
+            $deviceInfo = $this->getDevices()[0] ?? null;
 
-            if ($device === null) {
+            if ($deviceInfo === null) {
                 throw new NFCException('Available NFC device not found');
             }
+
+            $device = $deviceInfo->getDevice();
         }
 
         $this->NFCContext->getEventManager()
@@ -167,9 +167,11 @@ class LibNFC implements DriverInterface
         $this->NFCContext
             ->getNFC()
             ->getLogger()
-            ->info("Start to listen");
+            ->info("Start to listen on device {$device->getDeviceName()} [{$device->getConnection()}]");
 
         $touched = null;
+        $modulations ??= (new \NFC\Util\PredefinedModulations($this->NFCContext))
+            ->all();
 
         do {
             switch ($device->getLastErrorCode()) {
@@ -196,7 +198,7 @@ class LibNFC implements DriverInterface
                     continue;
                 }
 
-                $target = new NFCTarget(
+                $target = new ($this->NFCTargetClassName)(
                     $this->NFCContext,
                     $device,
                     $NFCTargetContext
@@ -244,7 +246,7 @@ class LibNFC implements DriverInterface
                 }
 
                 try {
-                    while ($this->isPresent($device, $target)) {
+                    while (!$this->isPresent($device, $target)) {
                         usleep($this->waitPresentationReleaseInterval);
                     }
 
@@ -273,6 +275,11 @@ class LibNFC implements DriverInterface
                     );
             }
         } while ($this->hasNext());
+
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Finish to listen");
     }
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
@@ -284,23 +291,34 @@ class LibNFC implements DriverInterface
                     \FFI::addr($target->getNFCTargetContext()->getContext())
                 ) === 0;
 
-        if ($device->getLastErrorCode() !== NFCConstants::NFC_ETGRELEASED) {
+        if (
+            !in_array(
+                $device->getLastErrorCode(),
+                [
+                NFCConstants::NFC_ETGRELEASED,
+                NFCConstants::NFC_SUCCESS,
+                ],
+                true
+            )
+        ) {
             throw new NFCException(
                 "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
             );
         }
 
-        return $isPresent;
+        return !$isPresent;
     }
 
     public function poll(NFCDeviceInterface $device, NFCModulations $modulations): ?ContextProxyInterface
     {
         $NFCTargetContext = $this
-            ->NFCContext->getFFI()
+            ->NFCContext
+            ->getFFI()
             ->new('nfc_target');
 
         $result = $this
-            ->NFCContext->getFFI()
+            ->NFCContext
+            ->getFFI()
             ->nfc_initiator_poll_target(
                 $device->getDeviceContext()->getContext(),
                 $modulations->toCDataStructure($this->NFCContext->getFFI()),

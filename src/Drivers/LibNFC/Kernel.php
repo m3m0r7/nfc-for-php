@@ -40,6 +40,8 @@ class Kernel implements NFCInterface
     ];
 
     protected string $defaultLogFileName = 'nfc-for-php.log';
+    protected string $driverClassName = LibNFCDriver::class;
+    protected string $FFIContextProxyClassName = FFIContextProxy::class;
 
     protected ?array $libraryPaths = null;
     protected ?NFCContext $context = null;
@@ -105,7 +107,7 @@ class Kernel implements NFCInterface
             $this,
             $this->createNFCContextContextProxy($libraryPath),
             $eventManager ?? new NFCEventManager(),
-            LibNFC::class,
+            $this->driverClassName,
         );
     }
 
@@ -141,7 +143,7 @@ class Kernel implements NFCInterface
 
     protected function createNFCContextContextProxy(string $libraryPath): ContextProxyInterface
     {
-        return new FFIContextProxy(
+        return new ($this->FFIContextProxyClassName)(
             \FFI::cdef(
                 implode(
                     "\n",
