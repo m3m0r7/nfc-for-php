@@ -6,7 +6,7 @@ namespace NFC;
 
 use NFC\Contexts\ContextProxyInterface;
 
-abstract class Enum
+abstract class ContextEnum
 {
     protected ContextProxyInterface $ffi;
 
@@ -16,8 +16,8 @@ abstract class Enum
     }
     public function __get(string $name)
     {
-        return $this->getEnums()[$name] ?? null;
+        return $this->getValues()[$name] ?? null;
     }
 
-    abstract public function getEnums(): array;
+    abstract public function getValues(): array;
 }

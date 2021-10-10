@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace NFC;
+namespace NFC\Drivers\LibNFC;
 
-use Throwable;
+use NFC\ContextEnum;
+use NFC\NFCModulationTypesInterface;
 
 /**
  *
@@ -20,9 +21,9 @@ use Throwable;
  * @property-read $NMT_ISO14443BICLASS
  */
 
-class NFCModulationTypes extends Enum
+class NFCModulationTypes extends ContextEnum implements NFCModulationTypesInterface
 {
-    public function getEnums(): array
+    public function getValues(): array
     {
         return [
             'NMT_ISO14443A' => $this->ffi->NMT_ISO14443A,

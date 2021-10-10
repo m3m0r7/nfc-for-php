@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace NFC;
 
-use FFI\CData;
-use Monolog\Logger;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
@@ -16,13 +14,13 @@ use NFC\Drivers\DriverInterface;
  * @method NFCDeviceInterface findDeviceNameContain(string $deviceName)
  * @method string getVersion()
  * @method void start(NFCDeviceInterface $device = null, NFCModulations $modulations = null)
- * @method NFCBaudRates getBaudRates()
- * @method NFCModulationTypes getModulationsTypes()
+ * @method NFCBaudRatesInterface getBaudRates()
+ * @method NFCModulationTypesInterface getModulationsTypes()
  */
 class NFCContext
 {
     protected NFCInterface $NFC;
-    protected FFIContextProxy $FFI;
+    protected ContextProxyInterface $FFI;
     protected NFCOutput $output;
     protected DriverInterface $driver;
     protected NFCEventManager $eventManager;

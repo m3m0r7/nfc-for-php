@@ -7,6 +7,7 @@ namespace NFC\Drivers\LibNFC;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
@@ -102,39 +103,7 @@ class Kernel implements NFCInterface
 
         return $this->context = new NFCContext(
             $this,
-            new FFIContextProxy(
-                \FFI::cdef(
-                    implode(
-                        "\n",
-                        array_map(
-                            function (array $header) {
-                                $headerFile = $header[0] ?? null;
-                                $bindDefines = $header[1] ?? null;
-
-                                if (!is_file($headerFile)) {
-                                    throw new NFCException("Cannot open a header file: {$headerFile}");
-                                }
-
-                                $load = file_get_contents($headerFile);
-                                if ($bindDefines !== null) {
-                                    foreach ($bindDefines as $bindListedDefinesClassName) {
-                                        $defines = $bindListedDefinesClassName::all();
-                                        $load = str_replace(
-                                            array_keys($defines),
-                                            array_values($defines),
-                                            $load
-                                        );
-                                    }
-                                }
-
-                                return $load;
-                            },
-                            $this->headers
-                        )
-                    ),
-                    $libraryPath,
-                )
-            ),
+            $this->createNFCContextContextProxy($libraryPath),
             $eventManager ?? new NFCEventManager(),
             LibNFC::class,
         );
@@ -168,6 +137,43 @@ class Kernel implements NFCInterface
         $this->validateContextOpened();
 
         return $this->context;
+    }
+
+    protected function createNFCContextContextProxy(string $libraryPath): ContextProxyInterface
+    {
+        return new FFIContextProxy(
+            \FFI::cdef(
+                implode(
+                    "\n",
+                    array_map(
+                        function (array $header) {
+                            $headerFile = $header[0] ?? null;
+                            $bindDefines = $header[1] ?? null;
+
+                            if (!is_file($headerFile)) {
+                                throw new NFCException("Cannot open a header file: {$headerFile}");
+                            }
+
+                            $load = file_get_contents($headerFile);
+                            if ($bindDefines !== null) {
+                                foreach ($bindDefines as $bindListedDefinesClassName) {
+                                    $defines = $bindListedDefinesClassName::all();
+                                    $load = str_replace(
+                                        array_keys($defines),
+                                        array_values($defines),
+                                        $load
+                                    );
+                                }
+                            }
+
+                            return $load;
+                        },
+                        $this->headers
+                    )
+                ),
+                $libraryPath,
+            )
+        );
     }
 
     protected function validateContextOpened(): void

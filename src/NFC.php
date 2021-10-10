@@ -4,30 +4,25 @@ declare(strict_types=1);
 
 namespace NFC;
 
+use Monolog\Logger;
+
 /**
- * @mixin NFCInterface
+ * @method NFCContext createContext(?NFCEventManager $eventManager = null)
+ * @method NFCContext getContext()
+ * @method NFCInterface setLogger(Logger $logger)
+ * @method Logger getLogger()
  */
 class NFC
 {
     protected NFCInterface $NFC;
 
-    public function __construct(string $NFCDriverClassName = \NFC\Drivers\LibNFC\Kernel::class, ...$parameters)
+    public function __construct(string $NFCKernelClassName = \NFC\Drivers\LibNFC\Kernel::class, ...$parameters)
     {
-        $this->nfc = new $NFCDriverClassName(...$parameters);
+        $this->NFC = new $NFCKernelClassName(...$parameters);
     }
 
     public function __call($name, $parameters)
     {
-        return $this->nfc->{$name}(...$parameters);
-    }
-
-    public function createContext(?NFCEventManager $eventManager = null, string $driverClassName = null): NFCContext
-    {
-        return $this->nfc->createContext($eventManager, $driverClassName);
-    }
-
-    public function getContext(): NFCContext
-    {
-        return $this->nfc->getContext();
+        return $this->NFC->{$name}(...$parameters);
     }
 }

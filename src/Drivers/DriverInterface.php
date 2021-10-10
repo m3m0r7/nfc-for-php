@@ -6,10 +6,10 @@ namespace NFC\Drivers;
 
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
-use NFC\NFCBaudRates;
+use NFC\NFCBaudRatesInterface;
 use NFC\NFCContext;
 use NFC\NFCDeviceInterface;
-use NFC\NFCModulationTypes;
+use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 
 interface DriverInterface
@@ -20,9 +20,9 @@ interface DriverInterface
     public function getVersion(): string;
     public function getDevices(bool $includeCannotOpenDevices = false): array;
     public function findDeviceNameContain(string $deviceName): NFCDeviceInterface;
-    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null);
+    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void;
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool;
-    public function getBaudRates(): NFCBaudRates;
-    public function getModulationsTypes(): NFCModulationTypes;
+    public function getBaudRates(): NFCBaudRatesInterface;
+    public function getModulationsTypes(): NFCModulationTypesInterface;
     public function getNFCContext(): ContextProxyInterface;
 }

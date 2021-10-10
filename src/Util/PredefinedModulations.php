@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace NFC\Util;
 
-use FFI\CData;
 use NFC\Collections\NFCModulations;
-use NFC\NFCBaudRates;
+use NFC\NFCBaudRatesInterface;
 use NFC\NFCContext;
-use NFC\NFCModulationTypes;
+use NFC\NFCModulationTypesInterface;
 
 class PredefinedModulations
 {
     protected NFCContext $context;
-    protected NFCModulationTypes $modulationTypes;
-    protected NFCBaudRates $baudRates;
+    protected NFCModulationTypesInterface $modulationTypes;
+    protected NFCBaudRatesInterface $baudRates;
 
     public function __construct(NFCContext $NFCContext)
     {

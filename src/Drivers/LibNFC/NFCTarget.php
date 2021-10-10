@@ -58,7 +58,7 @@ class NFCTarget implements NFCTargetInterface
         $baudRateOrModeName = trim($baudRateOrModeName);
 
         // Find from modulation types
-        foreach ($modulationTypes->getEnums() as $value) {
+        foreach ($modulationTypes->getValues() as $value) {
             if ($this->context->getFFI()->str_nfc_modulation_type($value) === $modulationTypeName) {
                 $this->NFCTargetContext->nm->nmt = $value;
                 break;
@@ -66,7 +66,7 @@ class NFCTarget implements NFCTargetInterface
         }
 
         if ($this->NFCTargetContext->nm->nmt !== $modulationTypes->NMT_DEP) {
-            foreach ($baudRates->getEnums() as $value) {
+            foreach ($baudRates->getValues() as $value) {
                 if ($this->context->getFFI()->str_nfc_baud_rate($value) === $baudRateOrModeName) {
                     $this->NFCTargetContext->nm->nbr = $value;
                     break;

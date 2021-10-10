@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace NFC;
+namespace NFC\Drivers\LibNFC;
 
+use NFC\ContextEnum;
+use NFC\NFCBaudRatesInterface;
 use Throwable;
 
 /**
@@ -14,9 +16,9 @@ use Throwable;
  * @property-read $NBR_424
  * @property-read $NBR_847
  */
-class NFCBaudRates extends Enum
+class NFCBaudRates extends ContextEnum implements NFCBaudRatesInterface
 {
-    public function getEnums(): array
+    public function getValues(): array
     {
         return [
             'NBR_UNDEFINED' => $this->ffi->NBR_UNDEFINED,

@@ -15,14 +15,14 @@ use NFC\Drivers\LibNFC\NFCTarget;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
 use NFC\Drivers\LibNFC\Headers\NFCLogConstants;
-use NFC\NFCBaudRates;
+use NFC\NFCBaudRatesInterface;
 use NFC\NFCContext;
 use NFC\NFCDeviceException;
 use NFC\NFCDeviceInfo;
 use NFC\NFCDeviceInterface;
 use NFC\NFCEventManager;
 use NFC\NFCException;
-use NFC\NFCModulationTypes;
+use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 
 class LibNFC implements DriverInterface
@@ -43,8 +43,8 @@ class LibNFC implements DriverInterface
     // second
     protected int $continuousTouchAdjustmentExpires = 10;
 
-    protected NFCBaudRates $baudRates;
-    protected NFCModulationTypes $modulationTypes;
+    protected EmulateNFCBaudRates $baudRates;
+    protected EmulateModulationTypes $modulationTypes;
 
     public function open(): self
     {
@@ -73,8 +73,8 @@ class LibNFC implements DriverInterface
     {
         $this->NFCContext = $context;
 
-        $this->baudRates = new NFCBaudRates($this->NFCContext->getFFI());
-        $this->modulationTypes = new NFCModulationTypes($this->NFCContext->getFFI());
+        $this->baudRates = new EmulateNFCBaudRates($this->NFCContext->getFFI());
+        $this->modulationTypes = new EmulateModulationTypes($this->NFCContext->getFFI());
     }
 
     public function enableContinuousTouchAdjustment(bool $which): self
@@ -171,7 +171,7 @@ class LibNFC implements DriverInterface
 
         $touched = null;
 
-        while (true) {
+        do {
             switch ($device->getLastErrorCode()) {
                 case NFCConstants::NFC_ETIMEOUT: // Device not configured (This is shown when you did plug-out the NFC device)
                 case NFCConstants::NFC_ERFTRANS:
@@ -272,7 +272,7 @@ class LibNFC implements DriverInterface
                         $e
                     );
             }
-        }
+        } while ($this->hasNext());
     }
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
@@ -411,12 +411,12 @@ class LibNFC implements DriverInterface
         return $this;
     }
 
-    public function getBaudRates(): NFCBaudRates
+    public function getBaudRates(): NFCBaudRatesInterface
     {
         return $this->baudRates;
     }
 
-    public function getModulationsTypes(): NFCModulationTypes
+    public function getModulationsTypes(): NFCModulationTypesInterface
     {
         return $this->modulationTypes;
     }
@@ -441,5 +441,10 @@ class LibNFC implements DriverInterface
     public function getPollingInterval(): int
     {
         return $this->pollingInterval;
+    }
+
+    protected function hasNext(): bool
+    {
+        return true;
     }
 }
