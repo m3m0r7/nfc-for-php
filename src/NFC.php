@@ -4,12 +4,15 @@ declare(strict_types=1);
 namespace NFC;
 
 use FFI\CData;
+use NFC\Headers\NFCInternal;
+use NFC\Headers\NFCTypes;
 
 class NFC
 {
-    protected array $definitions = [
-        __DIR__ . '/definitions/nfc-types.cdef',
-        __DIR__ . '/definitions/nfc-routines.cdef',
+    protected array $headers = [
+        [__DIR__ . '/Headers/cdef/nfc-types.h', [NFCTypes::class]],
+        [__DIR__ . '/Headers/cdef/nfc-internal.h', [NFCInternal::class]],
+        [__DIR__ . '/Headers/cdef/nfc.h'],
     ];
 
     protected array $autoScanLocationsForUnix = [
@@ -69,8 +72,29 @@ class NFC
                 implode(
                     "\n",
                     array_map(
-                        static fn (string $definition) => file_get_contents($definition),
-                        $this->definitions
+                        function (array $header) {
+                            $headerFile = $header[0] ?? null;
+                            $bindDefines = $header[1] ?? null;
+
+                            if (!is_file($headerFile)) {
+                                throw new NFCException("Cannot open a header file: {$headerFile}");
+                            }
+
+                            $load = file_get_contents($headerFile);
+                            if ($bindDefines !== null) {
+                                foreach ($bindDefines as $bindListedDefinesClassName) {
+                                    $defines = $bindListedDefinesClassName::all();
+                                    $load = str_replace(
+                                        array_keys($defines),
+                                        array_values($defines),
+                                        $load
+                                    );
+                                }
+                            }
+
+                            return $load;
+                        },
+                        $this->headers
                     )
                 ),
                 $libraryPath,

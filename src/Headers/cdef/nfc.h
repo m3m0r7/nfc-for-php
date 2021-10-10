@@ -32,15 +32,15 @@
  */
 
 /* Library initialization/deinitialization */
-void nfc_init(nfc_context **context) ATTRIBUTE_NONNULL(1);
-void nfc_exit(nfc_context *context) ATTRIBUTE_NONNULL(1);
+void nfc_init(nfc_context **context);
+void nfc_exit(nfc_context *context);
 int nfc_register_driver(const nfc_driver *driver);
 
 /* NFC Device/Hardware manipulation */
-nfc_device *nfc_open(nfc_context *context, const nfc_connstring connstring) ATTRIBUTE_NONNULL(1);
+nfc_device *nfc_open(nfc_context *context, const nfc_connstring connstring);
 void nfc_close(nfc_device *pnd);
 int nfc_abort_command(nfc_device *pnd);
-size_t nfc_list_devices(nfc_context *context, nfc_connstring connstrings[], size_t connstrings_len) ATTRIBUTE_NONNULL(1);
+size_t nfc_list_devices(nfc_context *context, nfc_connstring connstrings[], size_t connstrings_len);
 int nfc_idle(nfc_device *pnd);
 
 /* NFC initiator: act as "reader" */
