@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace NFC\Headers;
+namespace NFC\Drivers\LibNFC\Headers;
 
 class NFCInternalConstants extends ConstantsEnum
 {

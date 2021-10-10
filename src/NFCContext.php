@@ -89,7 +89,7 @@ class NFCContext
         return $this->eventManager;
     }
 
-    public function getNFC(): NFC
+    public function getNFC(): NFCInterface
     {
         return $this->nfc;
     }
