@@ -26,7 +26,7 @@ class NFCOutput
             ->getFFI()
             ->str_nfc_target(
                 \FFI::addr($string),
-                \FFI::addr($nfcTarget->getNFCTargetContext()),
+                \FFI::addr($nfcTarget->getNFCTargetContext()->getContext()),
                 true
             );
 

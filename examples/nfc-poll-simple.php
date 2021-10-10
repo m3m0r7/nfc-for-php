@@ -40,13 +40,15 @@ $baudRates = $context->getBaudRates();
 
 $context
     ->start(
-        [
-            new \NFC\NFCModulation($modulationTypes->NMT_ISO14443A, $baudRates->NBR_106),
-            new \NFC\NFCModulation($modulationTypes->NMT_ISO14443B, $baudRates->NBR_106),
-            new \NFC\NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_212),
-            new \NFC\NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_424),
-            new \NFC\NFCModulation($modulationTypes->NMT_JEWEL, $baudRates->NBR_106),
-            new \NFC\NFCModulation($modulationTypes->NMT_ISO14443BICLASS, $baudRates->NBR_106),
-        ],
         $context->findDeviceNameContain('Sony'),
+        new \NFC\Collections\NFCModulations(
+            [
+                new \NFC\NFCModulation($modulationTypes->NMT_ISO14443A, $baudRates->NBR_106),
+                new \NFC\NFCModulation($modulationTypes->NMT_ISO14443B, $baudRates->NBR_106),
+                new \NFC\NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_212),
+                new \NFC\NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_424),
+                new \NFC\NFCModulation($modulationTypes->NMT_JEWEL, $baudRates->NBR_106),
+                new \NFC\NFCModulation($modulationTypes->NMT_ISO14443BICLASS, $baudRates->NBR_106),
+            ]
+        ),
     );

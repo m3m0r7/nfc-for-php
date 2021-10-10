@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace NFC;
 
+use NFC\Contexts\ContextProxyInterface;
+
 abstract class Enum
 {
-    protected \FFI $ffi;
+    protected ContextProxyInterface $ffi;
 
-    public function __construct(\FFI $ffi)
+    public function __construct(ContextProxyInterface $ffi)
     {
         $this->ffi = $ffi;
     }

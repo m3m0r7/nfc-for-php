@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace NFC;
 
 use FFI\CData;
+use NFC\Contexts\FFIContextProxy;
 use NFC\Headers\NFCInternal;
 use NFC\Headers\NFCTypes;
 
@@ -68,36 +69,38 @@ class NFC
         }
 
         return $this->context = new NFCContext(
-            \FFI::cdef(
-                implode(
-                    "\n",
-                    array_map(
-                        function (array $header) {
-                            $headerFile = $header[0] ?? null;
-                            $bindDefines = $header[1] ?? null;
+            new FFIContextProxy(
+                \FFI::cdef(
+                    implode(
+                        "\n",
+                        array_map(
+                            function (array $header) {
+                                $headerFile = $header[0] ?? null;
+                                $bindDefines = $header[1] ?? null;
 
-                            if (!is_file($headerFile)) {
-                                throw new NFCException("Cannot open a header file: {$headerFile}");
-                            }
-
-                            $load = file_get_contents($headerFile);
-                            if ($bindDefines !== null) {
-                                foreach ($bindDefines as $bindListedDefinesClassName) {
-                                    $defines = $bindListedDefinesClassName::all();
-                                    $load = str_replace(
-                                        array_keys($defines),
-                                        array_values($defines),
-                                        $load
-                                    );
+                                if (!is_file($headerFile)) {
+                                    throw new NFCException("Cannot open a header file: {$headerFile}");
                                 }
-                            }
 
-                            return $load;
-                        },
-                        $this->headers
-                    )
-                ),
-                $libraryPath,
+                                $load = file_get_contents($headerFile);
+                                if ($bindDefines !== null) {
+                                    foreach ($bindDefines as $bindListedDefinesClassName) {
+                                        $defines = $bindListedDefinesClassName::all();
+                                        $load = str_replace(
+                                            array_keys($defines),
+                                            array_values($defines),
+                                            $load
+                                        );
+                                    }
+                                }
+
+                                return $load;
+                            },
+                            $this->headers
+                        )
+                    ),
+                    $libraryPath,
+                )
             ),
             $eventManager ?? new NFCEventManager(),
         );

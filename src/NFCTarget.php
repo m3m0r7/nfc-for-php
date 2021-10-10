@@ -15,16 +15,18 @@ use NFC\Attributes\ISO14443BI;
 use NFC\Attributes\ISO14443BICLASS;
 use NFC\Attributes\Jewel;
 use NFC\Attributes\NFCTargetAttributeInterface;
+use NFC\Contexts\ContextProxyInterface;
+use NFC\Contexts\NFCTargetContextProxy;
 use Throwable;
 
 class NFCTarget
 {
     protected NFCContext $context;
-    protected CData $nfcTargetContext;
+    protected ContextProxyInterface $nfcTargetContext;
     protected NFCDevice $device;
     protected ?NFCTargetAttributeInterface $attribute = null;
 
-    public function __construct(NFCContext $context, NFCDevice $device, CData $nfcTargetContext)
+    public function __construct(NFCContext $context, NFCDevice $device, ContextProxyInterface $nfcTargetContext)
     {
         $this->context = $context;
         $this->device = $device;
@@ -109,7 +111,7 @@ class NFCTarget
             ->str_nfc_baud_rate($this->nfcTargetContext->nm->nbr);
     }
 
-    public function getNFCTargetContext(): CData
+    public function getNFCTargetContext(): ContextProxyInterface
     {
         return $this->nfcTargetContext;
     }

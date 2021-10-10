@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace NFC;
 
+use FFI\CData;
+
 class NFCDevice
 {
     protected string $connection;
     protected NFCContext $context;
-    protected $deviceContext = null;
+    protected ?CData $deviceContext = null;
 
     public function __construct(NFCContext $context)
     {

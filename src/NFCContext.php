@@ -4,11 +4,15 @@ declare(strict_types=1);
 namespace NFC;
 
 use FFI\CData;
+use NFC\Collections\NFCModulations;
+use NFC\Contexts\ContextProxyInterface;
+use NFC\Contexts\FFIContextProxy;
+use NFC\Contexts\NFCTargetContextProxy;
 use NFC\Headers\NFCInternal;
 
 class NFCContext
 {
-    protected \FFI $ffi;
+    protected FFIContextProxy $ffi;
     protected ?CData $context;
 
     protected int $pollingContinuations = 0xff;
@@ -29,8 +33,11 @@ class NFCContext
         $this->close();
     }
 
-    public function __construct(\FFI $ffi, NFCEventManager $eventManager)
+    public function __construct(ContextProxyInterface $ffi, NFCEventManager $eventManager)
     {
+        /**
+         * @var FFIContextProxy $ffi
+         */
         $this->ffi = $ffi;
         $this->eventManager = $eventManager;
     }
@@ -56,7 +63,7 @@ class NFCContext
         return $this;
     }
 
-    public function getFFI(): \FFI
+    public function getFFI(): ContextProxyInterface
     {
         return $this->ffi;
     }
@@ -195,23 +202,9 @@ class NFCContext
         return $this;
     }
 
-    public function start(array $modulations = [], NFCDevice $device = null): void
+    public function start(NFCDevice $device = null, NFCModulations $modulations = null): void
     {
         $this->validateContextOpened();
-
-        $modulationsSize = count($modulations);
-
-        $nfcModulations = $this
-            ->ffi
-            ->new('nfc_modulation[' . $modulationsSize . ']');
-
-        /**
-         * @var NFCModulation $modulation
-         */
-        foreach ($modulations as $index => $modulation) {
-            $nfcModulations[$index]->nmt = $modulation->getModulationType();
-            $nfcModulations[$index]->nbr = $modulation->getBaudRate();
-        }
 
         if ($device === null) {
             $device = $this->getDevices()[0] ?? null;
@@ -231,61 +224,55 @@ class NFCContext
         $touched = null;
 
         while (true) {
-            $nfcTargetContext = $this
-                ->ffi
-                ->new('nfc_target');
-
             try {
-                $pollResult = $this
-                    ->ffi
-                    ->nfc_initiator_poll_target(
-                        $device->getDeviceContext(),
-                        $nfcModulations,
-                        $modulationsSize,
-                        $this->pollingContinuations,
-                        $this->pollingInterval,
-                        ($this->ffi)::addr($nfcTargetContext),
-                    );
+                if (($nfcTargetContext = $this->poll($device, $modulations)) === null) {
+                    $this->eventManager
+                        ->dispatchEvent(
+                            NFCEventManager::EVENT_MISSING,
+                            $this,
+                            $device
+                        );
+                    continue;
+                }
 
-                if ($pollResult > 0) {
-                    $target = new NFCTarget(
-                        $this,
-                        $device,
-                        $nfcTargetContext
-                    );
+                $target = new NFCTarget(
+                    $this,
+                    $device,
+                    $nfcTargetContext
+                );
 
-                    $info = [
-                        'class' => get_class(
-                            $target
-                                ->getAttributeAccessor()
-                        ),
-                        'id' => $target
+                $info = [
+                    'class' => get_class(
+                        $target
                             ->getAttributeAccessor()
-                            ->getID()
-                    ];
+                    ),
+                    'id' => $target
+                        ->getAttributeAccessor()
+                        ->getID()
+                ];
 
-                    $isTouchedMoment = false;
+                $isTouchedMoment = false;
 
-                    if ($touched !== null && $info['id'] === $touched['id']) {
-                        if ($touched['expires'] > time()) {
-                            $isTouchedMoment = true;
-                        }
+                if ($touched !== null && $info['id'] === $touched['id']) {
+                    if ($touched['expires'] > time()) {
+                        $isTouchedMoment = true;
                     }
+                }
 
-                    if (!$isTouchedMoment) {
-                        $this->eventManager
-                            ->dispatchEvent(
-                                NFCEventManager::EVENT_TOUCH,
-                                $this,
-                                $target
-                            );
+                if (!$isTouchedMoment) {
+                    $this->eventManager
+                        ->dispatchEvent(
+                            NFCEventManager::EVENT_TOUCH,
+                            $this,
+                            $target
+                        );
 
-                        if ($this->enableContinuousTouchAdjustment) {
-                            $touched = $info + [
-                                    'expires' => time() + $this->continuousTouchAdjustmentExpires,
-                                ];
-                        }
+                    if ($this->enableContinuousTouchAdjustment) {
+                        $touched = $info + [
+                            'expires' => time() + $this->continuousTouchAdjustmentExpires,
+                        ];
                     }
+                }
 //
 //                    while ($this->ffi->nfc_initiator_target_is_present($device->getDeviceContext(), \FFI::addr($nfcTargetContext)) === 0) {
 //                        usleep(250);
@@ -295,14 +282,6 @@ class NFCContext
 //                        'leave',
 //                        $target
 //                    );
-                } else {
-                    $this->eventManager
-                        ->dispatchEvent(
-                            NFCEventManager::EVENT_MISSING,
-                            $this,
-                            $device
-                        );
-                }
             } catch (\Throwable $e) {
                 $this->eventManager
                     ->dispatchEvent(
@@ -312,6 +291,30 @@ class NFCContext
                     );
             }
         }
+    }
+
+    public function poll(NFCDevice $device, NFCModulations $modulations): ?ContextProxyInterface
+    {
+        $nfcTargetContext = $this
+            ->ffi
+            ->new('nfc_target');
+
+        $result = $this
+            ->ffi
+            ->nfc_initiator_poll_target(
+                $device->getDeviceContext(),
+                $modulations->toCDataStructure($this->ffi),
+                count($modulations),
+                $this->pollingContinuations,
+                $this->pollingInterval,
+                \FFI::addr($nfcTargetContext),
+            );
+
+        if ($result <= 0) {
+            return null;
+        }
+
+        return new NFCTargetContextProxy($nfcTargetContext);
     }
 
     public function getBaudRates(): NFCBaudRates

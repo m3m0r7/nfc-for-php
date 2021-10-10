@@ -3,7 +3,6 @@
   "description": "NFC Reader with the libnfc written in PHP",
   "type": "library",
   "license": "MIT",
-  "minimum-stability": "dev",
   "authors": [
     {
       "name": "memory"
@@ -11,7 +10,8 @@
   ],
   "require": {
     "php": ">=7.4|>=8",
-    "ext-ffi": "*"
+    "ext-ffi": "*",
+    "illuminate/collections": "^8.63"
   },
   "autoload": {
     "psr-4": {
