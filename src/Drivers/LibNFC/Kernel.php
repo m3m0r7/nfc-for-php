@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC;
 
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use NFC\Contexts\FFIContextProxy;
 use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
@@ -35,8 +38,11 @@ class Kernel implements NFCInterface
         'libnfc.6.dll',
     ];
 
+    protected string $defaultLogFileName = 'nfc-for-php.log';
+
     protected ?array $libraryPaths = null;
     protected ?NFCContext $context = null;
+    protected ?Logger $logger = null;
 
     public function __construct($libraryPaths = null)
     {
@@ -55,22 +61,43 @@ class Kernel implements NFCInterface
         }
     }
 
+    public function setLogger(Logger $logger): self
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
     public function createContext(?NFCEventManager $eventManager = null): NFCContext
     {
         $libraryPath = null;
+        $this->getLogger()->info(
+            'Search using libnfc library'
+        );
+
         foreach ($this->libraryPaths as $path) {
             if (is_file($path)) {
                 $libraryPath = $path;
+                $this->getLogger()->info(
+                    "Use library: {$libraryPath}"
+                );
                 break;
             }
             if (is_dir($path)) {
                 foreach ($this->autoScanLibraryNames as $name) {
                     if (is_file($foundFilePath = $path . DIRECTORY_SEPARATOR . $name)) {
                         $libraryPath = $foundFilePath;
+
+                        $this->getLogger()->info(
+                            "Use library: {$libraryPath}"
+                        );
                         break 2;
                     }
                 }
             }
+        }
+
+        if ($libraryPath === null) {
+            throw new NFCException('Library not found.');
         }
 
         return $this->context = new NFCContext(
@@ -111,6 +138,29 @@ class Kernel implements NFCInterface
             $eventManager ?? new NFCEventManager(),
             LibNFC::class,
         );
+    }
+
+    public function getLogger(): Logger
+    {
+        if ($this->logger === null) {
+            $this->logger = new Logger(__CLASS__);
+            $handler = new StreamHandler(
+                getcwd() . "/{$this->defaultLogFileName}",
+                Logger::INFO,
+            );
+
+            $handler->setFormatter(
+                new LineFormatter(
+                    "[%datetime%] %level_name%: %message%\n",
+                    'Y-m-d H:i:s',
+                    true
+                )
+            );
+
+            $this->logger
+                ->pushHandler($handler);
+        }
+        return $this->logger;
     }
 
     public function getContext(): NFCContext

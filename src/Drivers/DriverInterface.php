@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace NFC\Drivers;
 
-use FFI\CData;
 use NFC\Collections\NFCModulations;
+use NFC\Contexts\ContextProxyInterface;
 use NFC\NFCBaudRates;
 use NFC\NFCContext;
 use NFC\NFCDeviceInterface;
@@ -24,5 +24,5 @@ interface DriverInterface
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool;
     public function getBaudRates(): NFCBaudRates;
     public function getModulationsTypes(): NFCModulationTypes;
-    public function getNFCContext(): CData;
+    public function getNFCContext(): ContextProxyInterface;
 }

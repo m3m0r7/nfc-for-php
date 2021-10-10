@@ -7,6 +7,7 @@ namespace NFC\Drivers\LibNFC;
 use FFI\CData;
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
+use NFC\Contexts\NFCContextContextProxy;
 use NFC\Contexts\NFCTargetContextProxy;
 use NFC\Drivers\DriverInterface;
 use NFC\Drivers\LibNFC\NFCDevice;
@@ -26,7 +27,7 @@ use NFC\NFCTargetInterface;
 
 class LibNFC implements DriverInterface
 {
-    protected ?CData $context = null;
+    protected ?ContextProxyInterface $context = null;
     protected ?NFCContext $NFCContext = null;
     protected bool $enableContinuousTouchAdjustment = true;
 
@@ -39,23 +40,34 @@ class LibNFC implements DriverInterface
     protected int $pollingContinuations = 0xff;
     protected int $pollingInterval = 2;
 
+    // second
+    protected int $continuousTouchAdjustmentExpires = 10;
+
     protected NFCBaudRates $baudRates;
     protected NFCModulationTypes $modulationTypes;
 
     public function open(): self
     {
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Open the libnfc: Log Level [$this->libNFCLogLevel]");
+
         // Set libnfc log level;
         putenv("LIBNFC_LOG_LEVEL={$this->libNFCLogLevel}");
 
-        $this->context = $this->NFCContext->getFFI()->new('nfc_context *');
-        $this->NFCContext->getFFI()->nfc_init(\FFI::addr($this->context));
+        $this->context = new NFCContextContextProxy($this->NFCContext->getFFI()->new('nfc_context *'));
+        $this->NFCContext->getFFI()->nfc_init(\FFI::addr($this->context->getContext()));
+
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Initialized NFC");
+
         $this->isOpened = true;
 
         return $this;
     }
-
-    // second
-    protected int $continuousTouchAdjustmentExpires = 10;
 
     public function __construct(NFCContext $context)
     {
@@ -81,9 +93,14 @@ class LibNFC implements DriverInterface
     {
         $this->validateContextOpened();
 
-        $this->NFCContext->getFFI()->nfc_exit($this->context);
+        $this->NFCContext->getFFI()->nfc_exit($this->context->getContext());
         $this->context = null;
         $this->isOpened = false;
+
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("NFC Exit");
     }
 
     public function getVersion(): string
@@ -114,7 +131,7 @@ class LibNFC implements DriverInterface
         }
 
         if (count($exceptions) === 0) {
-            throw new NFCException('Unable to find available device.');
+            throw new NFCException('Unable to find available device');
         }
 
         throw new NFCException(
@@ -136,7 +153,7 @@ class LibNFC implements DriverInterface
             $device = $this->getDevices()[0] ?? null;
 
             if ($device === null) {
-                throw new NFCException('NFC Device not found.');
+                throw new NFCException('Available NFC device not found');
             }
         }
 
@@ -146,6 +163,11 @@ class LibNFC implements DriverInterface
                 $this->NFCContext,
                 $device
             );
+
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Start to listen");
 
         $touched = null;
 
@@ -202,17 +224,23 @@ class LibNFC implements DriverInterface
                     continue;
                 }
 
-                $this->NFCContext->getEventManager()
+                $this->NFCContext
+                    ->getEventManager()
                     ->dispatchEvent(
                         NFCEventManager::EVENT_TOUCH,
                         $this->NFCContext,
                         $target
                     );
 
+                $this->NFCContext
+                    ->getNFC()
+                    ->getLogger()
+                    ->info("Touched target: {$target->getAttributeAccessor()->getID()}");
+
                 if ($this->enableContinuousTouchAdjustment) {
                     $touched = $info + [
-                            'expires' => time() + $this->continuousTouchAdjustmentExpires,
-                        ];
+                        'expires' => time() + $this->continuousTouchAdjustmentExpires,
+                    ];
                 }
 
                 try {
@@ -220,17 +248,25 @@ class LibNFC implements DriverInterface
                         usleep($this->waitPresentationReleaseInterval);
                     }
 
-                    $this->NFCContext->getEventManager()
+                    $this->NFCContext
+                        ->getEventManager()
                         ->dispatchEvent(
                             NFCEventManager::EVENT_RELEASE,
                             $this->NFCContext,
                             $target
                         );
+
+                    $this->NFCContext
+                        ->getNFC()
+                        ->getLogger()
+                        ->info("Released target: {$target->getAttributeAccessor()->getID()}");
+
                 } catch (\Throwable $e) {
                     throw $e;
                 }
             } catch (\Throwable $e) {
-                $this->NFCContext->getEventManager()
+                $this->NFCContext
+                    ->getEventManager()
                     ->dispatchEvent(
                         NFCEventManager::EVENT_ERROR,
                         $this->NFCContext,
@@ -242,7 +278,8 @@ class LibNFC implements DriverInterface
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
-        $isPresent = $this->NFCContext->getFFI()
+        $isPresent = $this->NFCContext
+                ->getFFI()
                 ->nfc_initiator_target_is_present(
                     $device->getDeviceContext()->getContext(),
                     \FFI::addr($target->getNFCTargetContext()->getContext())
@@ -289,13 +326,15 @@ class LibNFC implements DriverInterface
         $this->validateContextOpened();
 
         $connectionTargets = $this
-            ->NFCContext->getFFI()
+            ->NFCContext
+            ->getFFI()
             ->new("nfc_connstring[{$this->maxFetchDevices}]");
 
         $this
-            ->NFCContext->getFFI()
+            ->NFCContext
+            ->getFFI()
             ->nfc_list_devices(
-                $this->context,
+                $this->context->getContext(),
                 $connectionTargets,
                 $this->maxFetchDevices
             );
@@ -309,7 +348,7 @@ class LibNFC implements DriverInterface
             }
         }
 
-        return array_values(
+        $devices = array_values(
             array_filter(
                 array_map(
                     function (string $connectionTarget) use ($includeCannotOpenDevices) {
@@ -329,9 +368,16 @@ class LibNFC implements DriverInterface
                 )
             )
         );
+
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Available devices found: " . count($devices));
+
+        return $devices;
     }
 
-    public function getNFCContext(): CData
+    public function getNFCContext(): ContextProxyInterface
     {
         return $this->context;
     }
@@ -356,7 +402,7 @@ class LibNFC implements DriverInterface
         }
 
         if ($this->context === null) {
-            throw new NFCException('Context was closed');
+            throw new NFCException('Closed the context');
         }
     }
 

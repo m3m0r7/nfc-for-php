@@ -7,7 +7,7 @@ namespace NFC\Drivers\LibNFC;
 use FFI\CData;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCDeviceContextProxy;
-use NFC\Headers\NFCConstants;
+use NFC\Drivers\LibNFC\Headers\NFCConstants;
 use NFC\NFCContext;
 use NFC\NFCDeviceException;
 use NFC\NFCDeviceInterface;
@@ -49,7 +49,7 @@ class NFCDevice implements NFCDeviceInterface
             ->context
             ->getFFI()
             ->nfc_open(
-                $this->context->getNFCContext(),
+                $this->context->getNFCContext()->getContext(),
                 $connection
             );
 

@@ -41,6 +41,7 @@ $ composer require m3m0r7/nfc-for-php
 4. Run example code
 
 ```
+$ cd /path/to/nfc-for-php
 $ php examples/nfc-poll-simple.php
 ```
 
