@@ -101,6 +101,9 @@ class NFCContext
         }
     }
 
+    /**
+     * @return ContextProxyInterface|FFIContextProxy
+     */
     public function getFFI(): ContextProxyInterface
     {
         return $this->FFI;
