@@ -12,6 +12,7 @@ use NFC\NFCException;
 use NFC\Util\Util;
 
 /**
+ * @see https://github.com/nfcpy/nfcpy/blob/master/src/nfc/clf/rcs380.py
  * @see https://github.com/ysomei/test_getnfcid/blob/master/getdeviceid.cpp
  */
 class RCS380Command
