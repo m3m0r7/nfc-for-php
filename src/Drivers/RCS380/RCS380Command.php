@@ -250,6 +250,8 @@ class RCS380Command
 
     protected static function encode(string $data): string
     {
+        $data = "\xD6" . $data;
+
         $packet = '';
 
         // MAGIC
@@ -263,9 +265,6 @@ class RCS380Command
 
         // CHECKSUM FOR LENGTH
         $packet .= chr(static::calculateChecksum([$low, $high]));
-
-        // PREFIX
-        $packet .= "\xD6";
 
         // DATA
         $packet .= $data;
