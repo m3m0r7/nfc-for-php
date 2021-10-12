@@ -149,6 +149,16 @@ class NFCDevice implements NFCDeviceInterface
         return $this->deviceContextProxy ??= new NFCDeviceContextProxy($this->deviceContext);
     }
 
+    public function getPortIn(): int
+    {
+        return 0;
+    }
+
+    public function getPortOut(): int
+    {
+        return 0;
+    }
+
     protected function validateDeviceOpened(): void
     {
         if ($this->deviceContext === null) {

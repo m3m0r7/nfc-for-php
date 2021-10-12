@@ -6,7 +6,6 @@ namespace NFC\Drivers\RCS380;
 
 use NFC\Collections\NFCModulations;
 use NFC\Contexts\ContextProxyInterface;
-use NFC\Contexts\UnusedContextProxy;
 use NFC\Drivers\DriverInterface;
 use NFC\Drivers\RCS380\Headers\LibUSBConstants;
 use NFC\NFCBaudRatesInterface;
