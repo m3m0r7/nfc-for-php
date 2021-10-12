@@ -42,4 +42,4 @@ $modulationTypes = $context->getModulationsTypes();
 $baudRates = $context->getBaudRates();
 
 $context
-    ->start($context->findDeviceNameContain('Sony'));
+    ->start($context->findDeviceName('Sony'));

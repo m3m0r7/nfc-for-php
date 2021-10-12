@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC\Headers;
 
+use NFC\ConstantsEnum;
+
 class NFCInternalConstants extends ConstantsEnum
 {
     public const DEVICE_NAME_LENGTH = 256;

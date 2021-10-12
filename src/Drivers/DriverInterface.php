@@ -19,7 +19,7 @@ interface DriverInterface
     public function close(): void;
     public function getVersion(): string;
     public function getDevices(bool $includeCannotOpenDevices = false): array;
-    public function findDeviceNameContain(string $deviceName): NFCDeviceInterface;
+    public function findDeviceName(string $deviceName): NFCDeviceInterface;
     public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void;
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool;
     public function getBaudRates(): NFCBaudRatesInterface;

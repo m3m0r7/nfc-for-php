@@ -50,7 +50,7 @@ class LibNFCTest extends TestCase
 
     public function testFindDevice()
     {
-        $device = $this->NFCContext->findDeviceNameContain('dummy-de');
+        $device = $this->NFCContext->findDeviceName('dummy-de');
 
         $this->assertSame('dummy-device', $device->getDeviceName());
         $this->assertSame('dummy-1', $device->getConnection());
@@ -59,7 +59,7 @@ class LibNFCTest extends TestCase
     public function testFindDeviceThenNotFound()
     {
         $this->expectException(NFCDeviceNotFoundException::class);
-        $this->NFCContext->findDeviceNameContain('dummy-device-not-found');
+        $this->NFCContext->findDeviceName('dummy-device-not-found');
     }
 
     public function testStart()

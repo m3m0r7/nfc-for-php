@@ -54,7 +54,7 @@ class NFCContextTest extends TestCase
     {
         $this->assertSame(
             'emulator-1',
-            $this->NFCContext->findDeviceNameContain('emulator')->getDeviceName()
+            $this->NFCContext->findDeviceName('emulator')->getDeviceName()
         );
     }
 

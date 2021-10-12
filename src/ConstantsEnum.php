@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NFC\Drivers\LibNFC\Headers;
+namespace NFC;
 
 class ConstantsEnum
 {

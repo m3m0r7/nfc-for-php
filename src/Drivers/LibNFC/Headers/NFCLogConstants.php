@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC\Headers;
 
+use NFC\ConstantsEnum;
+
 class NFCLogConstants extends ConstantsEnum
 {
     public const NFC_LOG_PRIORITY_NONE  = 0;

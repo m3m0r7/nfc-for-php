@@ -54,5 +54,5 @@ $baudRates = $context->getBaudRates();
 
 $context
     ->start(
-        $context->findDeviceNameContain('Sony'),
+        $context->findDeviceName('Sony'),
     );

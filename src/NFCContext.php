@@ -11,7 +11,7 @@ use NFC\Drivers\DriverInterface;
 
 /**
  * @method array getDevices(bool $includeCannotOpenDevices = false)
- * @method NFCDeviceInterface findDeviceNameContain(string $deviceName)
+ * @method NFCDeviceInterface findDeviceName(string $deviceName)
  * @method string getVersion()
  * @method void start(NFCDeviceInterface $device = null, NFCModulations $modulations = null)
  * @method NFCBaudRatesInterface getBaudRates()

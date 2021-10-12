@@ -46,7 +46,7 @@ class EmulateDriver implements DriverInterface
         ];
     }
 
-    public function findDeviceNameContain(string $deviceName): NFCDeviceInterface
+    public function findDeviceName(string $deviceName): NFCDeviceInterface
     {
         return new EmulateNFCDevice();
     }

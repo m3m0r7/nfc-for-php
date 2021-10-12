@@ -29,5 +29,5 @@ $context
 
 $context
     ->start(
-        $context->findDeviceNameContain('Sony'),
+        $context->findDeviceName('Sony'),
     );
