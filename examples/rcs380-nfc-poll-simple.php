@@ -3,13 +3,13 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use NFC\NFC;
+use NFC\NFCOutput;
 use NFC\NFCEventManager;
 
 $NFC = new NFC(
-    \NFC\Drivers\LibNFC\Kernel::class,
-    '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
+    \NFC\Drivers\RCS380\Kernel::class,
+    '/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.dylib'
 );
-
 $context = $NFC->createContext(
     (new \NFC\NFCEventManager())
         ->listen(
@@ -33,24 +33,10 @@ $context = $NFC->createContext(
         ->listen(
             NFCEventManager::EVENT_TOUCH,
             function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $NFCTargetContext) {
-                echo "{$NFCTargetContext->getModulationType()} ({$NFCTargetContext->getBaudRate()}): {$NFCTargetContext->getAttributeAccessor()->getID()}\n";
-            }
-        )
-        ->listen(
-            NFCEventManager::EVENT_RELEASE,
-            function (\NFC\NFCContext $context, \NFC\NFCTargetInterface $NFCTargetContext) {
-                echo "Release: {$NFCTargetContext->getAttributeAccessor()->getID()}({$NFCTargetContext->getModulationType()})\n";
-            }
-        )
-        ->listen(
-            NFCEventManager::EVENT_ERROR,
-            function (\NFC\NFCContext $context, Throwable $e) {
-                echo "An error occurred:\n{$e}\n";
+                echo ((string) $NFCTargetContext) . "\n";
             }
         )
 );
 
 $context
-    ->start(
-        $context->findDeviceName('Sony'),
-    );
+    ->start($context->findDeviceName('RC-S380/P'));

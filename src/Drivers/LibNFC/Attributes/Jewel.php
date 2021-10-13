@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC\Attributes;
 
-use NFC\Attributes\AbstractNFCTargetAttribute;
+use NFC\Drivers\LibNFC\LibNFCAttribute;
 
-class Jewel extends AbstractNFCTargetAttribute
+class Jewel extends LibNFCAttribute
 {
     public function getAttributes(): array
     {

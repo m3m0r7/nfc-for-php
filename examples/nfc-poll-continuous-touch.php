@@ -20,9 +20,6 @@ $context = $NFC->createContext(
         )
 );
 
-$modulationTypes = $context->getModulationsTypes();
-$baudRates = $context->getBaudRates();
-
 $context
     ->getDriver()
     ->enableContinuousTouchAdjustment(false);

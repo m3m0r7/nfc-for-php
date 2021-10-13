@@ -14,14 +14,18 @@ use NFC\NFCDeviceException;
 use NFC\NFCDeviceInfo;
 use NFC\NFCDeviceInterface;
 use NFC\NFCDeviceNotFoundException;
+use NFC\NFCEventManager;
 use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
+use NFC\Util\Util;
 
 class RCS380Driver implements DriverInterface
 {
     protected const VENDOR_ID = 0x054C;
     protected const PRODUCT_ID = 0x06C3;
+
+    protected int $pollingInterval = 250;
 
     protected NFCContext $NFCContext;
     protected bool $isOpened = false;
@@ -163,7 +167,84 @@ class RCS380Driver implements DriverInterface
 
     public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
     {
-        throw new NFCException('This method (' . __METHOD__ . ') is not implemented yet');
+        if ($device === null) {
+            $deviceInfo = $this->getDevices()[0] ?? null;
+
+            if ($deviceInfo === null) {
+                throw new NFCException('Available NFC device not found');
+            }
+
+            $device = $deviceInfo->getDevice();
+        }
+
+        if (!($device instanceof NFCDevice)) {
+            throw new NFCDeviceException('Invalid NFCDevice type (' . get_class($device) . ')');
+        }
+
+        $this->NFCContext->getEventManager()
+            ->dispatchEvent(
+                NFCEventManager::EVENT_START,
+                $this->NFCContext,
+                $device
+            );
+
+        $commandInterface = new RCS380Command(
+            $this->NFCContext,
+            $device
+        );
+
+        $commandInterface->init();
+        $commandInterface->setCommandType();
+        $commandInterface->switchRF();
+        $commandInterface->inSetRF();
+        $commandInterface->inSetProtocol1();
+        $commandInterface->inSetProtocol2();
+
+        while ($this->hasNext()) {
+            try {
+                $responsePacket = $commandInterface->sensfReq();
+                if ($responsePacket === null) {
+                    $this->NFCContext->getEventManager()
+                        ->dispatchEvent(
+                            NFCEventManager::EVENT_MISSING,
+                            $this->NFCContext,
+                            $device
+                        );
+                    usleep($this->pollingInterval);
+                    continue;
+                }
+
+                // FIXME
+                if (!isset($responsePacket[6], $responsePacket[7])) {
+                    continue;
+                }
+
+                $target = new NFCTarget($this->NFCContext, $device, $responsePacket);
+
+                $this->NFCContext
+                    ->getEventManager()
+                    ->dispatchEvent(
+                        NFCEventManager::EVENT_TOUCH,
+                        $this->NFCContext,
+                        $target
+                    );
+
+                // Stop the loop.
+                break;
+            } catch (\Throwable $e) {
+                $this->NFCContext
+                    ->getEventManager()
+                    ->dispatchEvent(
+                        NFCEventManager::EVENT_ERROR,
+                        $this->NFCContext,
+                        $e
+                    );
+            }
+        }
+    }
+
+    protected function hasNext() {
+        return true;
     }
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool

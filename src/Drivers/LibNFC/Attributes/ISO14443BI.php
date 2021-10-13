@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC\Attributes;
 
-use FFI\CData;
-use NFC\Attributes\AbstractNFCTargetAttribute;
+use NFC\Drivers\LibNFC\LibNFCAttribute;
 
-class ISO14443BI extends AbstractNFCTargetAttribute
+class ISO14443BI extends LibNFCAttribute
 {
     public function getAttributes(): array
     {

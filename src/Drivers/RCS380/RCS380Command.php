@@ -14,11 +14,14 @@ use NFC\Util\Util;
 /**
  * @see https://github.com/nfcpy/nfcpy/blob/master/src/nfc/clf/rcs380.py
  * @see https://github.com/ysomei/test_getnfcid/blob/master/getdeviceid.cpp
+ * @see https://qiita.com/saturday06/items/333fcdf5b3b8030c9b05
  */
 class RCS380Command
 {
     public const DEFAULT_TIMEOUT = 10;
     public const MAX_RECEIVED_BUFFER_SIZE = 255;
+
+    protected const MAGIC = "\x00\x00\xFF\xFF\xFF";
 
     // The Commands List
     public const InSetRF = 0x00;
@@ -74,44 +77,62 @@ class RCS380Command
         return $this;
     }
 
-    public function setCommandType(): self
+    public function setCommandType()
     {
-        $this->communicate(
+        return $this->communicate(
             static::toChar(
                 [static::SetCommandType, 0x01],
             )
         );
-
-        return $this;
     }
 
-    public function switchRF(): self
+    public function switchRF()
     {
-        $this->communicate(
+        return $this->communicate(
             static::toChar(
                 [static::SwitchRF, 0x00],
             )
         );
-
-        return $this;
     }
 
-    public function insertRF(): self
+    public function inSetRF()
     {
         $byteArray = [];
-        $protocol = [
-            0x02, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
-            0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07,
-            0x08, 0x08, 0x00, 0x09, 0x00, 0x0a, 0x00, 0x0b,
-            0x00, 0x0c, 0x00, 0x0e, 0x04, 0x0f, 0x00, 0x10,
-            0x00, 0x11, 0x00, 0x12, 0x00, 0x13, 0x06
-        ];
-
         switch ($this->type) {
             case $this->modulationType->FeliCa:
                 $byteArray = [
                     0x00, 0x01, 0x01, 0x0F, 0x01,
-                    ...$protocol,
+                ];
+                break;
+            default:
+                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+        }
+
+        return $this->communicate(
+            static::toChar($byteArray)
+        );
+    }
+
+    public function inSetProtocol1()
+    {
+        return $this->communicate(
+            static::toChar([
+                0x02, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
+                0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07,
+                0x08, 0x08, 0x00, 0x09, 0x00, 0x0a, 0x00, 0x0b,
+                0x00, 0x0c, 0x00, 0x0e, 0x04, 0x0f, 0x00, 0x10,
+                0x00, 0x11, 0x00, 0x12, 0x00, 0x13, 0x06
+            ])
+        );
+    }
+
+    public function inSetProtocol2()
+    {
+        $byteArray = [];
+        switch ($this->type) {
+            case $this->modulationType->FeliCa:
+                $byteArray = [
+                    0x00, 0x01, 0x01, 0x0F, 0x01,
                     0x02, 0x00, 0x18,
                 ];
                 break;
@@ -119,14 +140,12 @@ class RCS380Command
                 throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
         }
 
-        $this->communicate(
+        return $this->communicate(
             static::toChar($byteArray)
         );
-
-        return $this;
     }
 
-    public function inCommRF(): self
+    public function sensfReq(): ?string
     {
         $byteArray = [];
 
@@ -140,19 +159,37 @@ class RCS380Command
                 throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
         }
 
-        $this->communicate(
-            static::toChar($byteArray)
-        );
+        try {
+            $response =  $this->communicate(
+                static::toChar($byteArray)
+            );
+//
+//            if (substr($response, 0, strlen(static::MAGIC)) !== static::MAGIC) {
+//                throw new ReceivePacketException(
+//                    "Received packet is invalid: " . Util::toHex($response)
+//                );
+//            }
 
-        return $this;
+            return $response;
+        } catch (NFCDeviceException $e) {
+            return null;
+        }
     }
 
-    public function communicate(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT)
+    public function communicate(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): string
     {
+        $commandType = 'Unknown';
+        if (isset($commandData[0])) {
+            $commandType = array_search(
+                    ord($commandData[0]),
+                    (new \ReflectionClass($this))
+                        ->getConstants()) ?? 'Unknown';
+        }
+
         $this->NFCContext
             ->getNFC()
             ->getLogger()
-            ->info("Send Packet: " . Util::toHex($commandData));
+            ->info("Send Packet: {$commandType} " . Util::toHex($commandData));
 
         // Send
         $this->sendPacket(
@@ -193,6 +230,11 @@ class RCS380Command
             ->getFFI()
             ->new('int');
 
+        $this->NFCContext
+            ->getNFC()
+            ->getLogger()
+            ->info("Send raw packet: " . Util::toHex($commandData));
+
         $command = Util::atoi($commandData);
 
         $errorCode = $this
@@ -200,9 +242,9 @@ class RCS380Command
             ->getFFI()
             ->libusb_bulk_transfer(
                 $this->NFCDevice->getDeviceContext()->getContext(),
-                $this->NFCDevice->getPortOut(),
+                $this->NFCDevice->getTransportOut(),
                 $command,
-                count($commandData),
+                strlen($commandData),
                 \FFI::addr($length),
                 $timeOut,
             );
@@ -232,7 +274,7 @@ class RCS380Command
             ->getFFI()
             ->libusb_bulk_transfer(
                 $this->NFCDevice->getDeviceContext()->getContext(),
-                $this->NFCDevice->getPortIn(),
+                $this->NFCDevice->getTransportIn(),
                 $received,
                 \FFI::sizeof($received),
                 \FFI::addr($length),
@@ -255,7 +297,7 @@ class RCS380Command
         $packet = '';
 
         // MAGIC
-        $packet .= "\x00\x00\xFF\xFF\xFF";
+        $packet .= static::MAGIC;
 
         // PACKET LENGTH (LOW)
         $packet .= chr($low = strlen($data) & 0xFF);

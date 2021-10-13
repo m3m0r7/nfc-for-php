@@ -24,6 +24,7 @@ class NFCDevice implements NFCDeviceInterface
     protected ?NFCDeviceContextProxy $deviceContextProxy = null;
     protected ?string $deviceName = null;
     protected int $lastError = 0;
+    protected $transportEndpoint;
 
     public function __construct(NFCContext $NFCContext, ContextProxyInterface $selectedDevice, ContextProxyInterface $deviceDescriptor)
     {
@@ -72,6 +73,36 @@ class NFCDevice implements NFCDeviceInterface
         if ($this->lastError < 0 && !$forceOpen) {
             throw new NFCDeviceException('Cannot open a device [' . $this->lastError . ']');
         }
+
+        $this->lastError = $this->NFCContext
+            ->getFFI()
+            ->libusb_set_auto_detach_kernel_driver($this->deviceContext, 1);
+
+        $this->lastError = $this->NFCContext
+            ->getFFI()
+            ->libusb_set_configuration($this->deviceContext, 1);
+
+        if ($this->lastError < 0) {
+            throw new NFCDeviceException('Cannot open a device [' . $this->lastError . ']');
+        }
+
+        $this->lastError = $this->NFCContext
+            ->getFFI()
+            ->libusb_claim_interface($this->deviceContext, 0);
+
+        if ($this->lastError < 0) {
+            throw new NFCDeviceException('Cannot open a device [' . $this->lastError . ']');
+        }
+
+        $this->lastError = $this->NFCContext
+            ->getFFI()
+            ->libusb_set_interface_alt_setting($this->deviceContext, 0, 0);
+
+        if ($this->lastError < 0) {
+            throw new NFCDeviceException('Cannot open a device [' . $this->lastError . ']');
+        }
+
+        $this->transportEndpoint = $this->getTransportEndpoint();
 
         return $this;
     }
@@ -149,14 +180,73 @@ class NFCDevice implements NFCDeviceInterface
         return $this->deviceContextProxy ??= new NFCDeviceContextProxy($this->deviceContext);
     }
 
-    public function getPortIn(): int
+    public function getTransportIn(): int
     {
-        return 0;
+        return current($this->transportEndpoint['in']);
     }
 
-    public function getPortOut(): int
+    public function getTransportOut(): int
     {
-        return 0;
+        return current($this->transportEndpoint['out']);
+    }
+
+    protected function getTransportEndpoint(): array
+    {
+        $ffi = $this
+            ->NFCContext
+            ->getFFI();
+
+        $descriptors = $ffi
+            ->new('libusb_config_descriptor *');
+
+        $this->lastError = $this
+            ->NFCContext
+            ->getFFI()
+            ->libusb_get_config_descriptor(
+                $this->device->getContext(),
+                0,
+                \FFI::addr($descriptors)
+            );
+
+        if ($this->lastError < 0) {
+            throw new NFCDeviceException("An error occurred [{$this->lastError}]");
+        }
+
+        $bulkTransferEndpoints = [
+            'in' => null,
+            'out' => null,
+        ];
+
+        $descriptor = $descriptors[0];
+
+        for ($i = 0; $i < $descriptor->bNumInterfaces; $i++) {
+            $interface = $descriptor->interface[$i];
+            for ($j = 0; $j < $interface->num_altsetting; $j++) {
+                $altSetting = $interface->altsetting[$j];
+                for ($k = 0; $k < $altSetting->bNumEndpoints; $k++) {
+                    $endpoint = $altSetting->endpoint[$k];
+                    switch ($endpoint->bmAttributes & 0x03) {
+                        case $ffi->LIBUSB_TRANSFER_TYPE_BULK:
+                            if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_IN) {
+                                $bulkTransferEndpoints['in'][] = $endpoint->bEndpointAddress;
+                            }
+                            if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_OUT) {
+                                $bulkTransferEndpoints['out'][] = $endpoint->bEndpointAddress;
+                            }
+                            $bulkTransferEndpoint = $endpoint;
+                            break;
+                    }
+                }
+            }
+        }
+
+        if ($bulkTransferEndpoints['in'] === null || $bulkTransferEndpoints['out'] === null) {
+            throw new NFCDeviceException(
+                "The device cannot handle bulk transfer endpoint [{$this->getDeviceName()}]"
+            );
+        }
+
+        return $bulkTransferEndpoints;
     }
 
     protected function validateDeviceOpened(): void

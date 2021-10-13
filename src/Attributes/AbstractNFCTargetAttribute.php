@@ -12,14 +12,10 @@ use NFC\NFCTargetInterface;
 abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
 {
     protected NFCTargetInterface $target;
-    protected CData $context;
 
     public function __construct(NFCTargetInterface $target)
     {
         $this->target = $target;
-        $this->context = $target
-            ->getNFCTargetContext()
-            ->nti;
     }
 
     abstract public function getAttributes(): array;

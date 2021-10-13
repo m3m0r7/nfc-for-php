@@ -38,8 +38,5 @@ $context = $NFC->createContext(
         )
 );
 
-$modulationTypes = $context->getModulationsTypes();
-$baudRates = $context->getBaudRates();
-
 $context
     ->start($context->findDeviceName('Sony'));

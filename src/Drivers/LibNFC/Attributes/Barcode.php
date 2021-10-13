@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC\Attributes;
 
-use NFC\Attributes\AbstractNFCTargetAttribute;
+use NFC\Drivers\LibNFC\LibNFCAttribute;
 
-class Barcode extends AbstractNFCTargetAttribute
+class Barcode extends LibNFCAttribute
 {
     public function getAttributes(): array
     {

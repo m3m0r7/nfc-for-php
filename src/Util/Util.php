@@ -37,10 +37,10 @@ class Util
     public static function toHex(string $string): string
     {
         return implode(
-            ' ',
+            "\n",
             array_map(
                 static fn ($chunkedArray) => implode(
-                    "\n",
+                    ' ',
                     $chunkedArray
                 ),
                 array_chunk(
