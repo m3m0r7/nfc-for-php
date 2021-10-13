@@ -23,26 +23,23 @@ use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 use NFC\NFCTargetTimeoutException;
+use NFC\Util\ReaderAdjustable;
+use NFC\Util\ReaderPollable;
+use NFC\Util\ReaderReleasable;
 
 class LibNFCDriver implements DriverInterface
 {
+    use ReaderPollable;
+    use ReaderAdjustable;
+    use ReaderReleasable;
+
     protected ?ContextProxyInterface $context = null;
     protected ?NFCContext $NFCContext = null;
-    protected bool $enableContinuousTouchAdjustment = true;
 
     protected int $maxFetchDevices = NFCInternalConstants::DEVICE_PORT_LENGTH;
     protected bool $isOpened = false;
     protected int $libNFCLogLevel = NFCLogConstants::NFC_LOG_PRIORITY_NONE;
     protected string $NFCTargetClassName = NFCTarget::class;
-
-    protected int $waitPresentationReleaseInterval = 250;
-    protected int $waitDidNotReleaseTimeout = 30;
-
-    protected int $pollingContinuations = 0xff;
-    protected int $pollingInterval = 2;
-
-    // second
-    protected int $continuousTouchAdjustmentExpires = 10;
 
     protected NFCBaudRatesInterface $baudRates;
     protected NFCModulationTypesInterface $modulationTypes;
@@ -76,18 +73,6 @@ class LibNFCDriver implements DriverInterface
 
         $this->baudRates = new NFCBaudRates($this->NFCContext->getFFI());
         $this->modulationTypes = new NFCModulationTypes($this->NFCContext->getFFI());
-    }
-
-    public function enableContinuousTouchAdjustment(bool $which): self
-    {
-        $this->enableContinuousTouchAdjustment = $which;
-        return $this;
-    }
-
-    public function setContinuousTouchAdjustmentExpires(int $second): self
-    {
-        $this->continuousTouchAdjustmentExpires = $second;
-        return $this;
     }
 
     public function close(): void
@@ -332,13 +317,20 @@ class LibNFCDriver implements DriverInterface
                 $device->getDeviceContext()->getContext(),
                 $modulations->toCDataStructure($this->NFCContext->getFFI()),
                 count($modulations),
-                $this->pollingContinuations,
+                0xff,
                 $this->pollingInterval,
                 \FFI::addr($NFCTargetContext),
             );
 
         if ($result <= 0) {
             return null;
+        }
+
+        $this->pollCount++;
+
+        // Reset
+        if ($this->pollCount === PHP_INT_MAX) {
+            $this->pollCount = 0;
         }
 
         return new NFCTargetContextProxy($NFCTargetContext);
@@ -408,12 +400,6 @@ class LibNFCDriver implements DriverInterface
         return $this->context;
     }
 
-    public function setWaitPresentationReleaseInterval(int $ms): self
-    {
-        $this->waitPresentationReleaseInterval = $ms;
-        return $this;
-    }
-
     public function setMaxFetchDevices(int $devices): self
     {
         $this->maxFetchDevices = $devices;
@@ -446,32 +432,5 @@ class LibNFCDriver implements DriverInterface
     public function getModulationsTypes(): NFCModulationTypesInterface
     {
         return $this->modulationTypes;
-    }
-
-    public function setPollingContinuations(int $pollingContinuations): self
-    {
-        $this->pollingContinuations = $pollingContinuations;
-        return $this;
-    }
-
-    public function setPollingInterval(int $interval): self
-    {
-        $this->pollingInterval = $interval;
-        return $this;
-    }
-
-    public function getPollingContinuations(): int
-    {
-        return $this->pollingContinuations;
-    }
-
-    public function getPollingInterval(): int
-    {
-        return $this->pollingInterval;
-    }
-
-    protected function hasNext(): bool
-    {
-        return true;
     }
 }

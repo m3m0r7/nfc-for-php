@@ -21,7 +21,7 @@ class RCS380Command
     public const DEFAULT_TIMEOUT = 10;
     public const MAX_RECEIVED_BUFFER_SIZE = 255;
 
-    protected const MAGIC = "\x00\x00\xFF\xFF\xFF";
+    public const MAGIC = "\x00\x00\xFF\xFF\xFF";
 
     // The Commands List
     public const InSetRF = 0x00;

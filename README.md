@@ -3,28 +3,31 @@
 This library is a toy for me. You can read NFC with libnfc written in PHP.
 
 # Requirements
-- PHP 7.4 or later
+- PHP 7.4+
 - PHP FFI
-- libnfc
+- libnfc (_if you use NFC reader for RC-S330_)
+- libusb (_if you use NFC reader for RC-S380_)
 
 # Tested
 
 - Mac Big Sur
 - FeliCa
+  - PASMO
+  - Suica
+  - KONAMI e-AMUSEMENT pass
+  - Pixel5
 - PaSoRi RC-S330
   - https://www.amazon.co.jp/dp/B001MVPD8U/
-
-# Warning
-
-- PaSoRi RC-S380 is not supported the libnfc. I have a roadmap to implement RC-S380.
-  - It is required to develop a driver. For example, the nfcpy has been implemented.
-    - see: https://github.com/nfcpy/nfcpy/blob/master/src/nfc/clf/rcs380.py
+- PaSoRi RC-S380 (experimental)
+  - Supported only to a FeliCa
+  - https://www.amazon.co.jp/dp/B00948CGAG/
 
 <img src="images/pasori.jpg">
 
 # Quick start
 
 ## Mac
+### RC-S330
 1. Install libnfc
 
 ```
@@ -52,6 +55,32 @@ $ php examples/nfc-poll-simple.php
 6. You can get output.
 
 <img src="images/example.jpg">
+
+### RC-S380
+
+1. Install libnfc
+
+```
+$ brew install libusb
+```
+
+2. Install this library
+
+```
+$ composer require m3m0r7/nfc-for-php
+```
+
+3. Connect NFC Device into your machine.
+4. Run example code
+
+```
+$ cd /path/to/nfc-for-php
+$ php examples/rcs380-nfc-poll-simple.php
+```
+
+5. Put your NFC
+6. You can get output.
+
 
 # How to use
 
