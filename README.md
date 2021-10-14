@@ -5,8 +5,8 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
 # Requirements
 - PHP 7.4+
 - PHP FFI
-- libnfc (_if you use NFC reader for RC-S330_)
-- libusb (_if you use NFC reader for RC-S380_)
+- libnfc (_if you use NFC reader for PaSoRi RC-S330_)
+- libusb (_if you use NFC reader for PaSoRi RC-S380_)
 
 # Tested
 
@@ -24,7 +24,7 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
   - You can touch Apple Wallet on iOS
   - https://www.amazon.co.jp/dp/B00948CGAG/
 
-<img src="images/pasori.jpg">
+<img src="images/pasori.jpg" />
 
 # Quick start
 
