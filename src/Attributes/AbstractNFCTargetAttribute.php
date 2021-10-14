@@ -6,7 +6,6 @@ namespace NFC\Attributes;
 
 use FFI\CData;
 use NFC\NFCAttributeException;
-use NFC\NFCTarget;
 use NFC\NFCTargetInterface;
 
 abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
@@ -30,6 +29,16 @@ abstract class AbstractNFCTargetAttribute implements NFCTargetAttributeInterface
         if ($this->getIDAttributeName() === null) {
             throw new NFCAttributeException('The target type has not an ID.');
         }
-        return (string) $this->getAttributes()[$this->getIDAttributeName()];
+        return $this->get($this->getIDAttributeName());
+    }
+
+    public function get(string $name)
+    {
+        return (string) ($this->getAttributes()[$name] ?? '(null)');
+    }
+
+    public function __toString()
+    {
+        return "IDm: {$this->getID()}";
     }
 }

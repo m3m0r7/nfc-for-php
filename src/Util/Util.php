@@ -53,4 +53,9 @@ class Util
             )
         );
     }
+
+    public static function splitHex(string $text): string
+    {
+        return implode(' ', str_split($text, 2));
+    }
 }

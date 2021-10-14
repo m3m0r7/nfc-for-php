@@ -48,10 +48,9 @@ class NFCTarget implements NFCTargetInterface
 
     public function __toString(): string
     {
-        // FIXME
         return <<< _
-        {$this->getModulationType()} ({$this->getBaudRate()})
-            IDm: {$this->getAttributeAccessor()->getID()}
+        {$this->getModulationType()} ({$this->getBaudRate()}) target:
+        {$this->getAttributeAccessor()}
         _;
     }
 

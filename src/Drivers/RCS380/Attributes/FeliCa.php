@@ -18,11 +18,18 @@ class FeliCa extends AbstractNFCTargetAttribute
             throw new ReceivePacketException("Packet is invalid [" . Util::toHex(implode($IDmPacket)) . "]");
         }
 
-//        var_dump(Util::toHex($this->target->getPacket()));
         return [
             'nfcid2' => sprintf(
                 '%02X%02X%02X%02X%02X%02X%02X%02X',
                 ...array_map('ord', $IDmPacket)
+            ),
+            'pad' => sprintf(
+                '%02X%02X%02X%02X%02X%02X%02X%02X',
+                ...array_map('ord', array_slice(str_split($this->target->getPacket()), 25, 8))
+            ),
+            'sc' => sprintf(
+                '%02X%02X',
+                ...array_map('ord', array_slice(str_split($this->target->getPacket()), 33, 2))
             ),
         ];
     }
@@ -30,5 +37,18 @@ class FeliCa extends AbstractNFCTargetAttribute
     public function getIDAttributeName(): ?string
     {
         return 'nfcid2';
+    }
+
+    public function __toString()
+    {
+        $id = Util::splitHex($this->getID());
+        $pad = Util::splitHex($this->get('pad'));
+        $sc = Util::splitHex($this->get('sc'));
+
+        return <<< _
+                ID (NFCID2): {$id}
+            Parameter (PAD): {$pad}
+           System Code (SC): {$sc}
+        _;
     }
 }
