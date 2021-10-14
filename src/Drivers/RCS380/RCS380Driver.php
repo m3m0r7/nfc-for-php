@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\RCS380;
 
-use NFC\Collections\NFCModulations;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NullContextProxy;
 use NFC\Drivers\DriverInterface;
@@ -20,6 +20,7 @@ use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 use NFC\NFCTargetTimeoutException;
+use NFC\Util\PredefinedModulations;
 use NFC\Util\ReaderAdjustable;
 use NFC\Util\ReaderPollable;
 use NFC\Util\ReaderReleasable;
@@ -38,9 +39,17 @@ class RCS380Driver implements DriverInterface
     protected ?string $lastResponsePacket = null;
     protected ?RCS380Command $commandInterface = null;
 
+    protected NFCBaudRatesInterface $baudRates;
+    protected NFCModulationTypesInterface $modulationTypes;
+
+    protected NFCModulationsInterface $modulations;
+
     public function __construct(NFCContext $NFCContext)
     {
         $this->NFCContext = $NFCContext;
+
+        $this->baudRates = new NFCBaudRates($this->NFCContext->getFFI());
+        $this->modulationTypes = new NFCModulationTypes($this->NFCContext->getFFI());
     }
 
     public function open(): DriverInterface
@@ -173,7 +182,7 @@ class RCS380Driver implements DriverInterface
         );
     }
 
-    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
+    public function start(NFCDeviceInterface $device = null, NFCModulationsInterface $modulations = null): void
     {
         if ($device === null) {
             $deviceInfo = $this->getDevices()[0] ?? null;
@@ -189,6 +198,9 @@ class RCS380Driver implements DriverInterface
             throw new NFCDeviceException('Invalid NFCDevice type (' . get_class($device) . ')');
         }
 
+        $modulations ??= (new PredefinedModulations(NFCModulations::class, $this->NFCContext))
+            ->FeliCa();
+
         $this->NFCContext->getEventManager()
             ->dispatchEvent(
                 NFCEventManager::EVENT_START,
@@ -197,6 +209,8 @@ class RCS380Driver implements DriverInterface
             );
 
         $this->commandInterface = new RCS380Command(
+            $this,
+            $modulations,
             $this->NFCContext,
             $device
         );
@@ -208,10 +222,6 @@ class RCS380Driver implements DriverInterface
 
         $this->commandInterface->init();
         $this->commandInterface->setCommandType();
-        $this->commandInterface->switchRF();
-        $this->commandInterface->inSetRF();
-        $this->commandInterface->inSetProtocol1();
-        $this->commandInterface->inSetProtocol2();
 
         $this->NFCContext
             ->getNFC()
@@ -222,7 +232,7 @@ class RCS380Driver implements DriverInterface
 
         do {
             try {
-                $this->lastResponsePacket = $this->commandInterface->sensfReq();
+                [$selectedModulation, $this->lastResponsePacket] = $this->commandInterface->sensfReq();
                 if ($this->lastResponsePacket === null) {
                     $this->NFCContext->getEventManager()
                         ->dispatchEvent(
@@ -238,7 +248,12 @@ class RCS380Driver implements DriverInterface
                     continue;
                 }
 
-                $target = new NFCTarget($this->NFCContext, $device, $this->lastResponsePacket);
+                $target = new NFCTarget(
+                    $selectedModulation,
+                    $this->NFCContext,
+                    $device,
+                    $this->lastResponsePacket
+                );
 
                 $info = [
                     'class' => get_class(
@@ -277,8 +292,8 @@ class RCS380Driver implements DriverInterface
 
                 if ($this->enableContinuousTouchAdjustment) {
                     $touched = $info + [
-                            'expires' => time() + $this->continuousTouchAdjustmentExpires,
-                        ];
+                        'expires' => time() + $this->continuousTouchAdjustmentExpires,
+                    ];
                 }
 
                 // Detect release touching
@@ -305,6 +320,8 @@ class RCS380Driver implements DriverInterface
                     ->getLogger()
                     ->info("Released target: {$target->getAttributeAccessor()->getID()}");
             } catch (\Throwable $e) {
+                var_dump((string) $e);
+                exit();
                 $this->NFCContext
                     ->getEventManager()
                     ->dispatchEvent(
@@ -323,17 +340,17 @@ class RCS380Driver implements DriverInterface
 
     public function getBaudRates(): NFCBaudRatesInterface
     {
-        throw new NFCException('This method (' . __METHOD__ . ') is not implemented yet');
+        return $this->baudRates;
     }
 
     public function getModulationsTypes(): NFCModulationTypesInterface
     {
-        throw new NFCException('This method (' . __METHOD__ . ') is not implemented yet');
+        return $this->modulationTypes;
     }
 
     public function getNFCContext(): ContextProxyInterface
     {
-        return new NullContextProxy();
+        return $this->NFCContext->getFFI();
     }
 
     private function validateContextOpened()

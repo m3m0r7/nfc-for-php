@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\LibNFC;
 
-use NFC\Collections\NFCModulations;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCContextContextProxy;
 use NFC\Contexts\NFCTargetContextProxy;
@@ -23,6 +23,7 @@ use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 use NFC\NFCTargetTimeoutException;
+use NFC\Util\PredefinedModulations;
 use NFC\Util\ReaderAdjustable;
 use NFC\Util\ReaderPollable;
 use NFC\Util\ReaderReleasable;
@@ -131,7 +132,7 @@ class LibNFCDriver implements DriverInterface
         );
     }
 
-    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
+    public function start(NFCDeviceInterface $device = null, NFCModulationsInterface $modulations = null): void
     {
         $this->validateContextOpened();
 
@@ -158,7 +159,7 @@ class LibNFCDriver implements DriverInterface
             ->info("Start to listen on device {$device->getDeviceName()} [{$device->getConnection()}]");
 
         $touched = null;
-        $modulations ??= (new \NFC\Util\PredefinedModulations($this->NFCContext))
+        $modulations ??= (new PredefinedModulations(NFCModulations::class, $this->NFCContext))
             ->all();
 
         do {
@@ -303,7 +304,7 @@ class LibNFCDriver implements DriverInterface
         return !$isPresent;
     }
 
-    public function poll(NFCDeviceInterface $device, NFCModulations $modulations): ?ContextProxyInterface
+    public function poll(NFCDeviceInterface $device, NFCModulationsInterface $modulations): ?ContextProxyInterface
     {
         $NFCTargetContext = $this
             ->NFCContext

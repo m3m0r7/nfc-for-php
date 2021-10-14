@@ -8,8 +8,11 @@ use NFC\Attributes\NFCTargetAttributeInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NullContextProxy;
 use NFC\Drivers\RCS380\Attributes\FeliCa;
+use NFC\NFCBaudRatesInterface;
 use NFC\NFCContext;
 use NFC\NFCDeviceInterface;
+use NFC\NFCModulation;
+use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 
 class NFCTarget implements NFCTargetInterface
@@ -18,12 +21,19 @@ class NFCTarget implements NFCTargetInterface
     protected NFCDeviceInterface $device;
     protected ?NFCTargetAttributeInterface $attribute = null;
     protected string $packet;
+    protected NFCModulation $modulations;
+    protected NFCModulationTypesInterface $modulationsTypes;
+    protected NFCBaudRatesInterface $baudRates;
 
-    public function __construct(NFCContext $context, NFCDeviceInterface $device, string $packet)
+    public function __construct(NFCModulation $modulations, NFCContext $context, NFCDeviceInterface $device, string $packet)
     {
+        $this->modulations = $modulations;
         $this->context = $context;
         $this->device = $device;
         $this->packet = $packet;
+
+        $this->modulationsTypes = new NFCModulationTypes($context->getFFI());
+        $this->baudRates = new NFCBaudRates($context->getFFI());
     }
 
     public function getNFCContext(): NFCContext
@@ -47,14 +57,18 @@ class NFCTarget implements NFCTargetInterface
 
     public function getModulationType(): string
     {
-        // FIXME
-        return 'FeliCa';
+        return array_search(
+            $this->modulations->getModulationType(),
+            $this->modulationsTypes->getValues(),
+        );
     }
 
     public function getBaudRate(): string
     {
-        // FIXME
-        return '212 kbps';
+        return array_search(
+            $this->modulations->getBaudRate(),
+            $this->baudRates->getValues(),
+        );
     }
 
     public function getNFCTargetContext(): ContextProxyInterface

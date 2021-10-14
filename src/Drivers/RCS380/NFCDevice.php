@@ -24,7 +24,7 @@ class NFCDevice implements NFCDeviceInterface
     protected ?NFCDeviceContextProxy $deviceContextProxy = null;
     protected ?string $deviceName = null;
     protected int $lastError = 0;
-    protected $transportEndpoint;
+    protected array $transportEndpoint = [];
 
     public function __construct(NFCContext $NFCContext, ContextProxyInterface $selectedDevice, ContextProxyInterface $deviceDescriptor)
     {

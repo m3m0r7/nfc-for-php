@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace NFC\Drivers\RCS380;
 
 use FFI\CData;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Drivers\DriverInterface;
 use NFC\NFCContext;
 use NFC\NFCDeviceException;
 use NFC\NFCException;
+use NFC\NFCModulation;
 use NFC\Util\Util;
 
 /**
@@ -52,18 +54,18 @@ class RCS380Command
 
     protected NFCContext $NFCContext;
     protected NFCDevice $NFCDevice;
-    protected NFCModulationTypes $modulationType;
-    protected int $type;
+    protected NFCModulationTypes $modulationTypes;
+    protected NFCModulationsInterface $modulations;
+    protected RCS380Driver $driver;
 
-    public function __construct(NFCContext $NFCContext, NFCDevice $NFCDevice)
+    public function __construct(RCS380Driver $driver, NFCModulationsInterface $modulations, NFCContext $NFCContext, NFCDevice $NFCDevice)
     {
+        $this->driver = $driver;
         $this->NFCContext = $NFCContext;
         $this->NFCDevice = $NFCDevice;
 
-        $this->modulationType = new NFCModulationTypes($this->NFCContext->getFFI());
-
-        // FIXME: Replace to changeable
-        $this->type = $this->modulationType->FeliCa;
+        $this->modulationTypes = new NFCModulationTypes($NFCContext->getFFI());
+        $this->modulations = $modulations;
     }
 
     public function init(): self
@@ -95,11 +97,12 @@ class RCS380Command
         );
     }
 
-    public function inSetRF()
+    public function inSetRF(int $type)
     {
         $byteArray = [];
-        switch ($this->type) {
-            case $this->modulationType->FeliCa:
+
+        switch ($type) {
+            case $this->modulationTypes->NMT_FELICA:
                 $byteArray = [
                     0x00, 0x01, 0x01, 0x0F, 0x01,
                 ];
@@ -117,7 +120,7 @@ class RCS380Command
     {
         return $this->communicate(
             static::toChar([
-                0x02, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
+                static::InSetProtocol, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
                 0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07,
                 0x08, 0x08, 0x00, 0x09, 0x00, 0x0a, 0x00, 0x0b,
                 0x00, 0x0c, 0x00, 0x0e, 0x04, 0x0f, 0x00, 0x10,
@@ -126,18 +129,17 @@ class RCS380Command
         );
     }
 
-    public function inSetProtocol2()
+    public function inSetProtocol2(int $type)
     {
         $byteArray = [];
-        switch ($this->type) {
-            case $this->modulationType->FeliCa:
+        switch ($type) {
+            case $this->modulationTypes->NMT_FELICA:
                 $byteArray = [
-                    0x00, 0x01, 0x01, 0x0F, 0x01,
-                    0x02, 0x00, 0x18,
+                    0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
                 ];
                 break;
             default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
         return $this->communicate(
@@ -145,35 +147,53 @@ class RCS380Command
         );
     }
 
-    public function sensfReq(): ?string
+    public function sensfReq()
+    {
+        var_dump(Util::toHex($this->switchRF()));
+        var_dump(Util::toHex($this->inSetRF(1)));
+        var_dump(Util::toHex($this->inSetProtocol1()));
+        var_dump(Util::toHex($this->inSetProtocol2(1)));
+        var_dump(Util::toHex($this->inCommRF(1)));
+        exit();
+
+        /**
+         * @var NFCModulation $modulation
+         */
+        while (true) {
+            foreach ($this->modulations as $modulation) {
+                $response = $this->inCommRF(1);
+                var_dump($response);
+                if ($response === static::toChar([0x00, 0x00, 0xFF, 0x00, 0xFF])) {
+                    sleep(2);
+                    continue;
+                }
+
+                return [$modulation, $response];
+            }
+        }
+    }
+
+    public function inCommRF(int $type): ?string
     {
         $byteArray = [];
 
-        switch ($this->type) {
-            case $this->modulationType->FeliCa:
+        switch ($type) {
+            case $this->modulationTypes->NMT_FELICA:
                 $byteArray = [
                     static::InCommRF, 0x6e, 0x00, 0x06, 0x00, 0xff, 0xff, 0x01, 0x00,
                 ];
                 break;
             default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
-        try {
-            $response =  $this->communicate(
-                static::toChar($byteArray)
-            );
-//
-//            if (substr($response, 0, strlen(static::MAGIC)) !== static::MAGIC) {
-//                throw new ReceivePacketException(
-//                    "Received packet is invalid: " . Util::toHex($response)
-//                );
-//            }
-
-            return $response;
-        } catch (NFCDeviceException $e) {
-            return null;
-        }
+//        try {
+        return $this->communicate(
+            static::toChar($byteArray)
+        );
+//        } catch (NFCDeviceException $e) {
+//            return null;
+//        }
     }
 
     public function communicate(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): string
@@ -233,7 +253,7 @@ class RCS380Command
         $this->NFCContext
             ->getNFC()
             ->getLogger()
-            ->info("Send raw packet: " . Util::toHex($commandData));
+            ->debug("Send raw packet: " . Util::toHex($commandData));
 
         $command = Util::atoi($commandData);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NFC\Drivers\Emulator;
 
-use NFC\Collections\NFCModulations;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NullContextProxy;
 use NFC\Drivers\DriverInterface;
@@ -51,7 +51,7 @@ class EmulateDriver implements DriverInterface
         return new EmulateNFCDevice();
     }
 
-    public function start(NFCDeviceInterface $device = null, NFCModulations $modulations = null): void
+    public function start(NFCDeviceInterface $device = null, NFCModulationsInterface $modulations = null): void
     {
         $this->context
             ->getNFC()

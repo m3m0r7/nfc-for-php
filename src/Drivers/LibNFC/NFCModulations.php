@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace NFC\Collections;
+namespace NFC\Drivers\LibNFC;
 
 use FFI\CData;
 use Illuminate\Support\Collection;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
 use NFC\NFCModulation;
-use NFC\NFCTarget;
 
-class NFCModulations extends Collection
+class NFCModulations extends Collection implements NFCModulationsInterface
 {
     protected ?CData $cdataStructure = null;
 

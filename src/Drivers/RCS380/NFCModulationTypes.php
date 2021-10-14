@@ -9,7 +9,7 @@ use NFC\NFCModulationTypesInterface;
 
 /**
  *
- * @property-read $FeliCa
+ * @property-read $NMT_FELICA
  */
 
 class NFCModulationTypes extends ContextEnum implements NFCModulationTypesInterface
@@ -17,7 +17,7 @@ class NFCModulationTypes extends ContextEnum implements NFCModulationTypesInterf
     public function getValues(): array
     {
         return [
-            'FeliCa' => 1,
+            'NMT_FELICA' => 1,
         ];
     }
 }

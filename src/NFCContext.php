@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NFC;
 
-use NFC\Collections\NFCModulations;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\FFIContextProxy;
 use NFC\Drivers\DriverInterface;
@@ -13,7 +13,7 @@ use NFC\Drivers\DriverInterface;
  * @method array getDevices(bool $includeCannotOpenDevices = false)
  * @method NFCDeviceInterface findDeviceName(string $deviceName)
  * @method string getVersion()
- * @method void start(NFCDeviceInterface $device = null, NFCModulations $modulations = null)
+ * @method void start(NFCDeviceInterface $device = null, NFCModulationsInterface $modulations = null)
  * @method NFCBaudRatesInterface getBaudRates()
  * @method NFCModulationTypesInterface getModulationsTypes()
  */

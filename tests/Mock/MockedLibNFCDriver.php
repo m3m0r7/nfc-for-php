@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Mock;
 
-use NFC\Collections\NFCModulations;
+use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
 use NFC\Contexts\NFCTargetContextProxy;
 use NFC\Drivers\LibNFC\LibNFCDriver;
@@ -15,7 +15,7 @@ class MockedLibNFCDriver extends LibNFCDriver
 {
     protected string $NFCTargetClassName = MockedNFCTarget::class;
 
-    public function poll(NFCDeviceInterface $device, NFCModulations $modulations): ?ContextProxyInterface
+    public function poll(NFCDeviceInterface $device, NFCModulationsInterface $modulations): ?ContextProxyInterface
     {
         $target = parent::poll($device, $modulations);
         $target->nm->nmt = 7;
