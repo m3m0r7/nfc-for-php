@@ -17,6 +17,7 @@ use NFC\NFCDeviceInterface;
 use NFC\NFCDeviceNotFoundException;
 use NFC\NFCEventManager;
 use NFC\NFCException;
+use NFC\NFCModulation;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 use NFC\NFCTargetTimeoutException;
@@ -43,6 +44,7 @@ class RCS380Driver implements DriverInterface
     protected NFCModulationTypesInterface $modulationTypes;
 
     protected NFCModulationsInterface $modulations;
+    protected NFCModulation $lastModulation;
 
     public function __construct(NFCContext $NFCContext)
     {
@@ -224,10 +226,6 @@ class RCS380Driver implements DriverInterface
 
         $this->commandInterface->init();
         $this->commandInterface->setCommandType();
-        $this->commandInterface->switchRF();
-        $this->commandInterface->inSetRF(1);
-        $this->commandInterface->inSetProtocol1();
-        $this->commandInterface->inSetProtocol2(1);
 
         $this->NFCContext
             ->getNFC()
@@ -238,7 +236,8 @@ class RCS380Driver implements DriverInterface
 
         do {
             try {
-                [$selectedModulation, $this->lastResponsePacket] = $this->commandInterface->sensfReq();
+                [$this->lastModulation, $this->lastResponsePacket] = $this->commandInterface->sensfReq();
+
                 if ($this->lastResponsePacket === null) {
                     $this->NFCContext->getEventManager()
                         ->dispatchEvent(
@@ -255,7 +254,7 @@ class RCS380Driver implements DriverInterface
                 }
 
                 $target = new NFCTarget(
-                    $selectedModulation,
+                    $this->lastModulation,
                     $this->NFCContext,
                     $device,
                     $this->lastResponsePacket
@@ -326,8 +325,6 @@ class RCS380Driver implements DriverInterface
                     ->getLogger()
                     ->info("Released target: {$target->getAttributeAccessor()->getID()}");
             } catch (\Throwable $e) {
-                var_dump((string) $e);
-                exit();
                 $this->NFCContext
                     ->getEventManager()
                     ->dispatchEvent(
@@ -341,7 +338,7 @@ class RCS380Driver implements DriverInterface
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
-        return true;
+        return $target->getPacket() === $this->commandInterface->sensfReq($target->getNFCModulation());
     }
 
     public function getBaudRates(): NFCBaudRatesInterface

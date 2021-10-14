@@ -22,6 +22,8 @@ class RCS380Command
 {
     public const DEFAULT_TIMEOUT = 10;
     public const MAX_RECEIVED_BUFFER_SIZE = 255;
+    public const TRY_MIXED_POLL_COUNT = 5;
+    public const WAIT_RETRY_TIME = 2;
 
     public const MAGIC = "\x00\x00\xFF\xFF\xFF";
 
@@ -147,21 +149,36 @@ class RCS380Command
         );
     }
 
-    public function sensfReq()
+    public function sensfReq(?NFCModulation $default = null): array
     {
         /**
          * @var NFCModulation $modulation
          */
         while (true) {
             foreach ($this->modulations as $modulation) {
-                $response = $this->inCommRF(1);
-                var_dump($response);
-                if ($response === static::toChar([0x00, 0x00, 0xFF, 0x00, 0xFF])) {
-                    sleep(2);
-                    continue;
+
+                if ($default !== null) {
+                    if ($default->getModulationType() !== $modulation->getModulationType() || $default->getBaudRate() !== $modulation->getBaudRate()) {
+                        continue;
+                    }
                 }
 
-                return [$modulation, $response];
+                $this->switchRF();
+                $this->inSetRF($modulation->getModulationType());
+                $this->inSetProtocol1();
+                $this->inSetProtocol2($modulation->getModulationType());
+
+                $remainingTries = static::TRY_MIXED_POLL_COUNT;
+                do {
+                    $response = $this->inCommRF($modulation->getModulationType());
+                    if ($response !== null) {
+                        return [
+                            $modulation,
+                            $response,
+                        ];
+                    }
+                } while ($response === null && $remainingTries-- >= 0);
+                sleep(static::WAIT_RETRY_TIME);
             }
         }
     }
@@ -180,13 +197,13 @@ class RCS380Command
                 throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
-//        try {
-        return $this->communicate(
-            static::toChar($byteArray)
-        );
-//        } catch (NFCDeviceException $e) {
-//            return null;
-//        }
+        try {
+            return $this->communicate(
+                static::toChar($byteArray)
+            );
+        } catch (NFCDeviceException $e) {
+            return null;
+        }
     }
 
     public function communicate(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): string
@@ -204,8 +221,6 @@ class RCS380Command
             ->getLogger()
             ->info("Send Packet: {$commandType} " . Util::toHex($commandData));
 
-        var_dump( '>>> ' . Util::toHex(static::encode($commandData)));
-
         // Send
         $this->sendPacket(
             $commandData,
@@ -215,8 +230,6 @@ class RCS380Command
         // Receive ACK/NCK
         $receivedACK = $this->receivePacket($timeOut);
 
-        var_dump( '<<< ' . Util::toHex($receivedACK));
-
         $this->NFCContext
             ->getNFC()
             ->getLogger()
@@ -224,8 +237,6 @@ class RCS380Command
 
         // Receive response
         $receivedResponse = $this->receivePacket($timeOut);
-
-        var_dump( '<<< ' . Util::toHex($receivedResponse));
 
         $this->NFCContext
             ->getNFC()

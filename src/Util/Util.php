@@ -23,10 +23,10 @@ class Util
 
     public static function atoi(string $string, int $size = null): CData
     {
-        $size = $size === null ? strlen($string) : $size;
+        $size = ($size === null ? strlen($string) : $size) + 1;
         $uInt8Array = \FFI::new("uint8_t[{$size}]");
         for ($i = 0; $i < $size; $i++) {
-            $uInt8Array[$i] = $string[$i] === null
+            $uInt8Array[$i] = !isset($string[$i])
                 ? 0
                 : ord($string[$i]);
         }

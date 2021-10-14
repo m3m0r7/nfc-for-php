@@ -57,18 +57,28 @@ class NFCTarget implements NFCTargetInterface
 
     public function getModulationType(): string
     {
-        return array_search(
-            $this->modulations->getModulationType(),
-            $this->modulationsTypes->getValues(),
-        );
+        switch ($this->modulations->getModulationType()) {
+            case $this->modulationsTypes->NMT_FELICA:
+                return 'FeliCa';
+        }
+
+        return 'Unknown';
     }
 
     public function getBaudRate(): string
     {
-        return array_search(
-            $this->modulations->getBaudRate(),
-            $this->baudRates->getValues(),
-        );
+        switch ($this->modulations->getBaudRate()) {
+            case $this->baudRates->NBR_106:
+                return '106 kbps';
+            case $this->baudRates->NBR_212:
+                return '212 kbps';
+            case $this->baudRates->NBR_424:
+                return '424 kbps';
+            case $this->baudRates->NBR_847:
+                return '847 kbps';
+        }
+
+        return 'Unknown';
     }
 
     public function getNFCTargetContext(): ContextProxyInterface
@@ -84,5 +94,10 @@ class NFCTarget implements NFCTargetInterface
     public function getPacket(): string
     {
         return $this->packet;
+    }
+
+    public function getNFCModulation(): NFCModulation
+    {
+        return $this->modulations;
     }
 }
