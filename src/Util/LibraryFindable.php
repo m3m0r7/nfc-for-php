@@ -13,7 +13,7 @@ trait LibraryFindable
     protected function setLibraryPaths($libraryPaths = null): self
     {
         if ($libraryPaths === null) {
-            $this->libraryPaths = $this->isWindows()
+            $this->libraryPaths = OS::isWindows()
                 // Windows does not supported for auto scan locations.
                 ? []
                 : (
@@ -22,7 +22,7 @@ trait LibraryFindable
                         : []
                 );
 
-            if (!$this->isWindows() && property_exists($this, 'defaultLibraryPath') && is_string($this->defaultLibraryPath)) {
+            if (!OS::isWindows() && property_exists($this, 'defaultLibraryPath') && is_string($this->defaultLibraryPath)) {
                 // Add working directory
                 $this->libraryPaths[] = getcwd() . '/' . $this->defaultLibraryPath;
             }
@@ -101,10 +101,5 @@ trait LibraryFindable
         }
 
         return $libraryPath;
-    }
-
-    protected function isWindows(): bool
-    {
-        return DIRECTORY_SEPARATOR === '\\';
     }
 }

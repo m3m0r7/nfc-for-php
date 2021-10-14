@@ -23,6 +23,7 @@ use NFC\NFCException;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
 use NFC\NFCTargetTimeoutException;
+use NFC\Util\OS;
 use NFC\Util\PredefinedModulations;
 use NFC\Util\ReaderAdjustable;
 use NFC\Util\ReaderPollable;
@@ -235,13 +236,17 @@ class LibNFCDriver implements DriverInterface
                 }
 
                 try {
-                    $timeout = time() + $this->waitDidNotReleaseTimeout;
-                    while (!$this->isPresent($device, $target)) {
-                        usleep($this->waitPresentationReleaseInterval);
-                        if (time() < $timeout) {
-                            throw new NFCTargetTimeoutException(
-                                'Timed out because it has not been released for a long time'
-                            );
+                    // FIXME: The target_is_present have a problem when using macOS.
+                    //        It is will output `Application level error detected`.
+                    if (!OS::isMac()) {
+                        $timeout = time() + $this->waitDidNotReleaseTimeout;
+                        while (!$this->isPresent($device, $target)) {
+                            usleep($this->waitPresentationReleaseInterval);
+                            if (time() > $timeout) {
+                                throw new NFCTargetTimeoutException(
+                                    'Timed out because it has not been released for a long time'
+                                );
+                            }
                         }
                     }
 
@@ -283,24 +288,24 @@ class LibNFCDriver implements DriverInterface
             ->getFFI()
             ->nfc_initiator_target_is_present(
                 $device->getDeviceContext()->getContext(),
-                \FFI::addr($target->getNFCTargetContext()->getContext())
+                null
             ) === 0;
 
         if (!in_array(
             $device->getLastErrorCode(),
             [
+                NFCConstants::NFC_EINVARG,
                 NFCConstants::NFC_ETGRELEASED,
                 NFCConstants::NFC_SUCCESS,
                 ],
             true
-        )
-        ) {
+        )) {
             throw new NFCException(
                 "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
             );
         }
 
-        return !$isPresent;
+        return $isPresent;
     }
 
     public function poll(NFCDeviceInterface $device, NFCModulationsInterface $modulations): ?ContextProxyInterface

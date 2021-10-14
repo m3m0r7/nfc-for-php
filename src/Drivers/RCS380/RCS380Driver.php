@@ -305,7 +305,18 @@ class RCS380Driver implements DriverInterface
                 $timeout = time() + $this->waitDidNotReleaseTimeout;
                 while (!$this->isPresent($device, $target)) {
                     usleep($this->waitPresentationReleaseInterval);
-                    if (time() < $timeout) {
+
+                    if (!$this->enableContinuousTouchAdjustment) {
+                        $this->NFCContext
+                            ->getEventManager()
+                            ->dispatchEvent(
+                                NFCEventManager::EVENT_TOUCH,
+                                $this->NFCContext,
+                                $target
+                            );
+                    }
+
+                    if (time() > $timeout) {
                         throw new NFCTargetTimeoutException(
                             'Timed out because it has not been released for a long time'
                         );
@@ -338,7 +349,10 @@ class RCS380Driver implements DriverInterface
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
-        return $target->getPacket() === $this->commandInterface->sensfReq($target->getNFCModulation());
+        $lastPacket = $target->getPacket();
+        [, $currentPacket] = $this->commandInterface->sensfReq($target->getNFCModulation());
+
+        return $currentPacket !== $lastPacket;
     }
 
     public function getBaudRates(): NFCBaudRatesInterface
