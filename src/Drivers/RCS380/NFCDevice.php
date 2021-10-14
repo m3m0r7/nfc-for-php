@@ -226,15 +226,15 @@ class NFCDevice implements NFCDeviceInterface
                 for ($k = 0; $k < $altSetting->bNumEndpoints; $k++) {
                     $endpoint = $altSetting->endpoint[$k];
                     switch ($endpoint->bmAttributes & 0x03) {
-                        case $ffi->LIBUSB_TRANSFER_TYPE_BULK:
-                            if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_IN) {
-                                $bulkTransferEndpoints['in'][] = $endpoint->bEndpointAddress;
-                            }
-                            if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_OUT) {
-                                $bulkTransferEndpoints['out'][] = $endpoint->bEndpointAddress;
-                            }
-                            $bulkTransferEndpoint = $endpoint;
-                            break;
+                    case $ffi->LIBUSB_TRANSFER_TYPE_BULK:
+                        if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_IN) {
+                            $bulkTransferEndpoints['in'][] = $endpoint->bEndpointAddress;
+                        }
+                        if (($endpoint->bEndpointAddress & 0x80) == $ffi->LIBUSB_ENDPOINT_OUT) {
+                            $bulkTransferEndpoints['out'][] = $endpoint->bEndpointAddress;
+                        }
+                        $bulkTransferEndpoint = $endpoint;
+                        break;
                     }
                 }
             }

@@ -164,15 +164,15 @@ class LibNFCDriver implements DriverInterface
 
         do {
             switch ($device->getLastErrorCode()) {
-                case NFCConstants::NFC_ETIMEOUT: // Device not configured (This is shown when you did plug-out the NFC device)
-                case NFCConstants::NFC_ERFTRANS:
-                case NFCConstants::NFC_EMFCAUTHFAIL:
-                case NFCConstants::NFC_ESOFT:
-                case NFCConstants::NFC_ECHIP:
-                case NFCConstants::NFC_EOPABORTED:
-                    throw new NFCException(
-                        "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
-                    );
+            case NFCConstants::NFC_ETIMEOUT: // Device not configured (This is shown when you did plug-out the NFC device)
+            case NFCConstants::NFC_ERFTRANS:
+            case NFCConstants::NFC_EMFCAUTHFAIL:
+            case NFCConstants::NFC_ESOFT:
+            case NFCConstants::NFC_ECHIP:
+            case NFCConstants::NFC_EOPABORTED:
+                throw new NFCException(
+                    "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
+                );
                     break;
             }
 
@@ -280,21 +280,20 @@ class LibNFCDriver implements DriverInterface
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
         $isPresent = $this->NFCContext
-                ->getFFI()
-                ->nfc_initiator_target_is_present(
-                    $device->getDeviceContext()->getContext(),
-                    \FFI::addr($target->getNFCTargetContext()->getContext())
-                ) === 0;
+            ->getFFI()
+            ->nfc_initiator_target_is_present(
+                $device->getDeviceContext()->getContext(),
+                \FFI::addr($target->getNFCTargetContext()->getContext())
+            ) === 0;
 
-        if (
-            !in_array(
-                $device->getLastErrorCode(),
-                [
+        if (!in_array(
+            $device->getLastErrorCode(),
+            [
                 NFCConstants::NFC_ETGRELEASED,
                 NFCConstants::NFC_SUCCESS,
                 ],
-                true
-            )
+            true
+        )
         ) {
             throw new NFCException(
                 "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"

@@ -29,6 +29,10 @@
     }
   },
   "scripts": {
-    "test": "phpunit --stop-on-failure --debug --stderr tests/Units"
+    "test": "phpunit --stop-on-failure --debug --stderr tests/Units",
+    "fix": [
+      "./vendor/bin/phpcbf src",
+      "./vendor/bin/phpcbf tests"
+    ]
   }
 }

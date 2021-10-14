@@ -104,13 +104,13 @@ class RCS380Command
         $byteArray = [];
 
         switch ($type) {
-            case $this->modulationTypes->NMT_FELICA:
-                $byteArray = [
-                    0x00, 0x01, 0x01, 0x0F, 0x01,
-                ];
-                break;
-            default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+        case $this->modulationTypes->NMT_FELICA:
+            $byteArray = [
+                0x00, 0x01, 0x01, 0x0F, 0x01,
+            ];
+            break;
+        default:
+            throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
         }
 
         return $this->communicate(
@@ -121,13 +121,15 @@ class RCS380Command
     public function inSetProtocol1()
     {
         return $this->communicate(
-            static::toChar([
+            static::toChar(
+                [
                 static::InSetProtocol, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
                 0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07,
                 0x08, 0x08, 0x00, 0x09, 0x00, 0x0a, 0x00, 0x0b,
                 0x00, 0x0c, 0x00, 0x0e, 0x04, 0x0f, 0x00, 0x10,
                 0x00, 0x11, 0x00, 0x12, 0x00, 0x13, 0x06
-            ])
+                ]
+            )
         );
     }
 
@@ -135,13 +137,13 @@ class RCS380Command
     {
         $byteArray = [];
         switch ($type) {
-            case $this->modulationTypes->NMT_FELICA:
-                $byteArray = [
-                    0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
-                ];
-                break;
-            default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
+        case $this->modulationTypes->NMT_FELICA:
+            $byteArray = [
+                0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
+            ];
+            break;
+        default:
+            throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
         return $this->communicate(
@@ -188,13 +190,13 @@ class RCS380Command
         $byteArray = [];
 
         switch ($type) {
-            case $this->modulationTypes->NMT_FELICA:
-                $byteArray = [
-                    static::InCommRF, 0x6e, 0x00, 0x06, 0x00, 0xff, 0xff, 0x01, 0x00,
-                ];
-                break;
-            default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
+        case $this->modulationTypes->NMT_FELICA:
+            $byteArray = [
+                static::InCommRF, 0x6e, 0x00, 0x06, 0x00, 0xff, 0xff, 0x01, 0x00,
+            ];
+            break;
+        default:
+            throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
         try {
@@ -211,9 +213,10 @@ class RCS380Command
         $commandType = 'Unknown';
         if (isset($commandData[0])) {
             $commandType = array_search(
-                    ord($commandData[0]),
-                    (new \ReflectionClass($this))
-                        ->getConstants()) ?? 'Unknown';
+                ord($commandData[0]),
+                (new \ReflectionClass($this))
+                ->getConstants()
+            ) ?? 'Unknown';
         }
 
         $this->NFCContext
@@ -342,12 +345,14 @@ class RCS380Command
         $packet .= $data;
 
         // CHECKSUM FOR DATA
-        $packet .= chr(static::calculateChecksum(
-            array_map(
-                'ord',
-                str_split($data)
+        $packet .= chr(
+            static::calculateChecksum(
+                array_map(
+                    'ord',
+                    str_split($data)
+                )
             )
-        ));
+        );
 
         // FOOTER
         $packet .= "\x00";

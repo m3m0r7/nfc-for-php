@@ -123,26 +123,26 @@ class NFCTarget implements NFCTargetInterface
         $modulationTypes = $this->context->getModulationsTypes();
 
         switch ($this->NFCTargetContext->nm->nmt) {
-            case $modulationTypes->NMT_ISO14443A:
-                return $this->attribute ??= new ISO14443A($this);
-            case $modulationTypes->NMT_JEWEL:
-                return $this->attribute ??= new Jewel($this);
-            case $modulationTypes->NMT_ISO14443B:
-                return $this->attribute ??= new ISO14443B($this);
-            case $modulationTypes->NMT_ISO14443BI:
-                return $this->attribute ??= new ISO14443BI($this);
-            case $modulationTypes->NMT_ISO14443B2SR:
-                return $this->attribute ??= new ISO14443B2SR($this);
-            case $modulationTypes->NMT_ISO14443B2CT:
-                return $this->attribute ??= new ISO14443B2CT($this);
-            case $modulationTypes->NMT_FELICA:
-                return $this->attribute ??= new FeliCa($this);
-            case $modulationTypes->NMT_DEP:
-                return $this->attribute ??= new Dep($this);
-            case $modulationTypes->NMT_BARCODE:
-                return $this->attribute ??= new Barcode($this);
-            case $modulationTypes->NMT_ISO14443BICLASS:
-                return $this->attribute ??= new ISO14443BICLASS($this);
+        case $modulationTypes->NMT_ISO14443A:
+            return $this->attribute ??= new ISO14443A($this);
+        case $modulationTypes->NMT_JEWEL:
+            return $this->attribute ??= new Jewel($this);
+        case $modulationTypes->NMT_ISO14443B:
+            return $this->attribute ??= new ISO14443B($this);
+        case $modulationTypes->NMT_ISO14443BI:
+            return $this->attribute ??= new ISO14443BI($this);
+        case $modulationTypes->NMT_ISO14443B2SR:
+            return $this->attribute ??= new ISO14443B2SR($this);
+        case $modulationTypes->NMT_ISO14443B2CT:
+            return $this->attribute ??= new ISO14443B2CT($this);
+        case $modulationTypes->NMT_FELICA:
+            return $this->attribute ??= new FeliCa($this);
+        case $modulationTypes->NMT_DEP:
+            return $this->attribute ??= new Dep($this);
+        case $modulationTypes->NMT_BARCODE:
+            return $this->attribute ??= new Barcode($this);
+        case $modulationTypes->NMT_ISO14443BICLASS:
+            return $this->attribute ??= new ISO14443BICLASS($this);
         }
 
         throw new NFCTargetException("Unknown target [{$this->NFCTargetContext->nm->nmt}, {$this->NFCTargetContext->nm->nbr}]");
