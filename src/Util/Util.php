@@ -9,7 +9,7 @@ use NFC\NFCInterface;
 
 class Util
 {
-    public static function itoa(CData $UIntArray)
+    public static function itoa(CData $UIntArray): string
     {
         $size = \FFI::sizeof($UIntArray);
 
@@ -37,7 +37,7 @@ class Util
     public static function toHex(string $string): string
     {
         return implode(
-            "\n",
+            " ",
             array_map(
                 static fn ($chunkedArray) => implode(
                     ' ',

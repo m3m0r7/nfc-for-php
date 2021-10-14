@@ -149,13 +149,6 @@ class RCS380Command
 
     public function sensfReq()
     {
-        var_dump(Util::toHex($this->switchRF()));
-        var_dump(Util::toHex($this->inSetRF(1)));
-        var_dump(Util::toHex($this->inSetProtocol1()));
-        var_dump(Util::toHex($this->inSetProtocol2(1)));
-        var_dump(Util::toHex($this->inCommRF(1)));
-        exit();
-
         /**
          * @var NFCModulation $modulation
          */
@@ -211,6 +204,8 @@ class RCS380Command
             ->getLogger()
             ->info("Send Packet: {$commandType} " . Util::toHex($commandData));
 
+        var_dump( '>>> ' . Util::toHex(static::encode($commandData)));
+
         // Send
         $this->sendPacket(
             $commandData,
@@ -220,6 +215,8 @@ class RCS380Command
         // Receive ACK/NCK
         $receivedACK = $this->receivePacket($timeOut);
 
+        var_dump( '<<< ' . Util::toHex($receivedACK));
+
         $this->NFCContext
             ->getNFC()
             ->getLogger()
@@ -227,6 +224,8 @@ class RCS380Command
 
         // Receive response
         $receivedResponse = $this->receivePacket($timeOut);
+
+        var_dump( '<<< ' . Util::toHex($receivedResponse));
 
         $this->NFCContext
             ->getNFC()

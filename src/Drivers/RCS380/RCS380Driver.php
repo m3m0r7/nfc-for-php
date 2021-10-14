@@ -224,6 +224,10 @@ class RCS380Driver implements DriverInterface
 
         $this->commandInterface->init();
         $this->commandInterface->setCommandType();
+        $this->commandInterface->switchRF();
+        $this->commandInterface->inSetRF(1);
+        $this->commandInterface->inSetProtocol1();
+        $this->commandInterface->inSetProtocol2(1);
 
         $this->NFCContext
             ->getNFC()
