@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace NFC\Util;
 
-use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Logger;
-use NFC\Drivers\LibNFC\Headers\NFCConstants;
-use NFC\Drivers\LibNFC\Headers\NFCInternalConstants;
-use NFC\Drivers\LibNFC\Headers\NFCTypesConstants;
 use NFC\NFCException;
 
 trait LibraryFindable

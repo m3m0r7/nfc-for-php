@@ -184,6 +184,8 @@ class RCS380Driver implements DriverInterface
 
     public function start(NFCDeviceInterface $device = null, NFCModulationsInterface $modulations = null): void
     {
+        $this->validateContextOpened();
+
         if ($device === null) {
             $deviceInfo = $this->getDevices()[0] ?? null;
 
@@ -335,7 +337,7 @@ class RCS380Driver implements DriverInterface
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {
-        return $this->lastResponsePacket === $this->commandInterface->sensfReq();
+        return true;
     }
 
     public function getBaudRates(): NFCBaudRatesInterface
