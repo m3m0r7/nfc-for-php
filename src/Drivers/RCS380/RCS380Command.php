@@ -20,12 +20,12 @@ use NFC\Util\Util;
  */
 class RCS380Command
 {
-    public const DEFAULT_TIMEOUT = 10;
     public const MAX_RECEIVED_BUFFER_SIZE = 255;
     public const TRY_MIXED_POLL_COUNT = 5;
     public const WAIT_RETRY_TIME = 2;
 
     public const MAGIC = "\x00\x00\xFF\xFF\xFF";
+    protected const NOP = "\x00\x00\xFF\x00\xFF";
 
     // The Commands List
     public const InSetRF = 0x00;
@@ -60,6 +60,8 @@ class RCS380Command
     protected NFCModulationsInterface $modulations;
     protected RCS380Driver $driver;
 
+    protected int $timeout = 10;
+
     public function __construct(RCS380Driver $driver, NFCModulationsInterface $modulations, NFCContext $NFCContext, NFCDevice $NFCDevice)
     {
         $this->driver = $driver;
@@ -83,20 +85,40 @@ class RCS380Command
 
     public function setCommandType()
     {
-        return $this->communicate(
+        $received = $this->communicate(
             static::toChar(
                 [static::SetCommandType, 0x01],
             )
         );
+
+        $expectedReceivedPacket = static::toChar([
+            0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
+            0xD7, 0x2B, 0x00, 0xFE,
+        ]);
+        if ($received !== $expectedReceivedPacket) {
+            throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
+        }
+
+        return $received;
     }
 
     public function switchRF()
     {
-        return $this->communicate(
+        $received = $this->communicate(
             static::toChar(
                 [static::SwitchRF, 0x00],
             )
         );
+
+        $expectedReceivedPacket = static::toChar([
+            0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
+            0xD7, 0x07, 0x00, 0x22
+        ]);
+        if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
+            throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
+        }
+
+        return $received;
     }
 
     public function inSetRF(int $type)
@@ -104,23 +126,32 @@ class RCS380Command
         $byteArray = [];
 
         switch ($type) {
-        case $this->modulationTypes->NMT_FELICA:
-            $byteArray = [
-                0x00, 0x01, 0x01, 0x0F, 0x01,
-            ];
-            break;
-        default:
-            throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+            case $this->modulationTypes->NMT_FELICA:
+                $byteArray = [
+                    0x00, 0x01, 0x01, 0x0F, 0x01,
+                ];
+                break;
+            default:
+                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
         }
 
-        return $this->communicate(
+        $received = $this->communicate(
             static::toChar($byteArray)
         );
+
+        $expectedReceivedPacket = static::toChar([
+            0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7, 0x01, 0x00, 0x28
+        ]);
+        if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
+            throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
+        }
+
+        return $received;
     }
 
     public function inSetProtocol1()
     {
-        return $this->communicate(
+        $received = $this->communicate(
             static::toChar(
                 [
                 static::InSetProtocol, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
@@ -131,24 +162,46 @@ class RCS380Command
                 ]
             )
         );
+
+        $expectedReceivedPacket1 = static::toChar([
+            0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7
+        ]);
+        $expectedReceivedPacket2 = static::toChar([
+            0x00, 0x26
+        ]);
+        if ($received !== static::NOP && substr($received, 0, strlen($expectedReceivedPacket1)) !== $expectedReceivedPacket1 || substr($received, -1 * strlen($expectedReceivedPacket2)) !== $expectedReceivedPacket2) {
+            throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "]");
+        }
+
+        return $received;
     }
 
     public function inSetProtocol2(int $type)
     {
         $byteArray = [];
         switch ($type) {
-        case $this->modulationTypes->NMT_FELICA:
-            $byteArray = [
-                0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
-            ];
-            break;
-        default:
-            throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
+            case $this->modulationTypes->NMT_FELICA:
+                $byteArray = [
+                    0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
+                ];
+                break;
+            default:
+                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
-        return $this->communicate(
-            static::toChar($byteArray)
+        $received = $this->communicate(
+            static::toChar($byteArray),
+            false
         );
+
+        $expectedReceivedPacket = static::toChar([
+            0x00, 0x00, 0xFF, 0x01, 0xFF, 0x7F, 0x81
+        ]);
+        if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
+            throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
+        }
+
+        return $received;
     }
 
     public function sensfReq(?NFCModulation $default = null): array
@@ -201,14 +254,15 @@ class RCS380Command
 
         try {
             return $this->communicate(
-                static::toChar($byteArray)
+                static::toChar($byteArray),
+                false
             );
         } catch (NFCDeviceException $e) {
             return null;
         }
     }
 
-    public function communicate(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): string
+    public function communicate(string $commandData, bool $validateMagic = true): string
     {
         $commandType = 'Unknown';
         if (isset($commandData[0])) {
@@ -227,11 +281,16 @@ class RCS380Command
         // Send
         $this->sendPacket(
             $commandData,
-            $timeOut
+            $this->timeout
         );
 
         // Receive ACK/NCK
-        $receivedACK = $this->receivePacket($timeOut);
+        $receivedACK = $this->receivePacket($this->timeout);
+
+        // Packet validation
+//        if ($receivedACK !== static::NOP) {
+//            throw new ReceivePacketException("ACK/NCK packet is invalid [" . Util::toHex($receivedACK, false) . "]");
+//        }
 
         $this->NFCContext
             ->getNFC()
@@ -239,7 +298,13 @@ class RCS380Command
             ->info("Recv ACK/NCK Packet: " . Util::toHex($receivedACK));
 
         // Receive response
-        $receivedResponse = $this->receivePacket($timeOut);
+        $receivedResponse = $this->receivePacket($this->timeout);
+
+//        if ($validateMagic) {
+//            if ($receivedResponse !== static::NOP && substr($receivedResponse, 0, strlen(static::MAGIC)) !== static::MAGIC) {
+//                throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($receivedResponse, false) . "]");
+//            }
+//        }
 
         $this->NFCContext
             ->getNFC()
@@ -249,15 +314,14 @@ class RCS380Command
         return $receivedResponse;
     }
 
-    public function sendPacket(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): int
+    public function sendPacket(string $commandData): int
     {
         return $this->sendRawPacket(
-            static::encode($commandData),
-            $timeOut
+            static::encode($commandData)
         );
     }
 
-    public function sendRawPacket(string $commandData, int $timeOut = self::DEFAULT_TIMEOUT): int
+    public function sendRawPacket(string $commandData): int
     {
         $length = $this->NFCContext
             ->getFFI()
@@ -279,7 +343,7 @@ class RCS380Command
                 $command,
                 strlen($commandData),
                 \FFI::addr($length),
-                $timeOut,
+                $this->timeout,
             );
 
         if ($errorCode < 0) {
@@ -292,7 +356,7 @@ class RCS380Command
     }
 
 
-    public function receivePacket(int $timeOut = self::DEFAULT_TIMEOUT): string
+    public function receivePacket(): string
     {
         $received = $this->NFCContext
             ->getFFI()
@@ -311,7 +375,7 @@ class RCS380Command
                 $received,
                 \FFI::sizeof($received),
                 \FFI::addr($length),
-                $timeOut,
+                $this->timeout,
             );
 
         if ($errorCode < 0) {

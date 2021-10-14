@@ -34,10 +34,10 @@ class Util
         return $uInt8Array;
     }
 
-    public static function toHex(string $string): string
+    public static function toHex(string $string, bool $break = true): string
     {
         return implode(
-            " ",
+            $break ? "\n" : " ",
             array_map(
                 static fn ($chunkedArray) => implode(
                     ' ',
