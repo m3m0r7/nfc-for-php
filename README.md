@@ -21,7 +21,7 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
   - https://www.amazon.co.jp/dp/B001MVPD8U/
 - PaSoRi RC-S380 (experimental)
   - Supported only to a FeliCa
-    - You can touch Apple Wallet on iOS
+  - You can touch Apple Wallet on iOS
   - https://www.amazon.co.jp/dp/B00948CGAG/
 
 <img src="images/pasori.jpg">
