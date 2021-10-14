@@ -13,9 +13,9 @@ use NFC\NFCDeviceNotFoundException;
 use NFC\Util\LoggerStackHandler;
 use NFC\Util\OS;
 use PHPUnit\Framework\TestCase;
-use Tests\Mock\MockedLibNFCKernel;
+use Tests\Mock\MockedRCS380Kernel;
 
-class LibNFCTest extends TestCase
+class RCS380Test extends TestCase
 {
     protected ?NFC $NFC = null;
     protected ?NFCContext $NFCContext = null;
@@ -24,9 +24,9 @@ class LibNFCTest extends TestCase
     public function setUp(): void
     {
         $this->NFC = new NFC(
-            MockedLibNFCKernel::class,
+            MockedRCS380Kernel::class,
             OS::isMac()
-                ? '/usr/local/Cellar/libnfc/1.8.0/lib/libnfc.dylib'
+                ? '/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.dylib'
                 : null,
         );
 
@@ -42,11 +42,9 @@ class LibNFCTest extends TestCase
     public function testListDevice()
     {
         $devices = $this->NFCContext->getDevices();
-        $this->assertCount(2, $devices);
+        $this->assertCount(1, $devices);
         $this->assertSame('dummy-device', $devices[0]->getDevice()->getDeviceName());
-        $this->assertSame('dummy-1', $devices[0]->getDevice()->getConnection());
-        $this->assertSame('dummy-device', $devices[1]->getDevice()->getDeviceName());
-        $this->assertSame('dummy-2', $devices[1]->getDevice()->getConnection());
+        $this->assertSame('pn53x_usb:001:002', $devices[0]->getDevice()->getConnection());
     }
 
     public function testFindDevice()
@@ -54,7 +52,7 @@ class LibNFCTest extends TestCase
         $device = $this->NFCContext->findDeviceName('dummy-de');
 
         $this->assertSame('dummy-device', $device->getDeviceName());
-        $this->assertSame('dummy-1', $device->getConnection());
+        $this->assertSame('pn53x_usb:001:002', $device->getConnection());
     }
 
     public function testFindDeviceThenNotFound()

@@ -32,8 +32,8 @@ class RCS380Driver implements DriverInterface
     use ReaderAdjustable;
     use ReaderReleasable;
 
-    protected const VENDOR_ID = 0x054C;
-    protected const PRODUCT_ID = 0x06C3;
+    public const VENDOR_ID = 0x054C;
+    public const PRODUCT_ID = 0x06C3;
 
     protected NFCContext $NFCContext;
     protected bool $isOpened = false;
@@ -45,6 +45,8 @@ class RCS380Driver implements DriverInterface
 
     protected NFCModulationsInterface $modulations;
     protected NFCModulation $lastModulation;
+
+    protected string $NFCDeviceClassName = NFCDevice::class;
 
     public function __construct(NFCContext $NFCContext)
     {
@@ -100,7 +102,7 @@ class RCS380Driver implements DriverInterface
         try {
             $deviceInfo = [];
             for ($i = 0; $i < $size; $i++) {
-                $selectedDevice = $devices[$i];
+                $selectedDevice = $devices[$i] ?? null;
 
                 $deviceDescriptor = $this
                     ->NFCContext
@@ -135,7 +137,7 @@ class RCS380Driver implements DriverInterface
 
                 $deviceInfo[] = new NFCDeviceInfo(
                     $connection,
-                    (new NFCDevice(
+                    (new ($this->NFCDeviceClassName)(
                         $this->NFCContext,
                         new SelectedDeviceContextProxy($selectedDevice),
                         new DeviceDescriptorContextProxy($deviceDescriptor),
