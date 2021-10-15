@@ -11,6 +11,7 @@ use NFC\NFCTargetInterface;
 class MockedRCS380Driver extends RCS380Driver
 {
     protected string $NFCDeviceClassName = MockedRCS380NFCDevice::class;
+    protected string $RSC380CommandClassName = MockedRCS380Command::class;
 
     public function isPresent(NFCDeviceInterface $device, NFCTargetInterface $target): bool
     {

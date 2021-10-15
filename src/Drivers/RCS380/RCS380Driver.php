@@ -47,6 +47,7 @@ class RCS380Driver implements DriverInterface
     protected NFCModulation $lastModulation;
 
     protected string $NFCDeviceClassName = NFCDevice::class;
+    protected string $RSC380CommandClassName = RCS380Command::class;
 
     public function __construct(NFCContext $NFCContext)
     {
@@ -214,7 +215,7 @@ class RCS380Driver implements DriverInterface
                 $device
             );
 
-        $this->commandInterface = new RCS380Command(
+        $this->commandInterface = new ($this->RSC380CommandClassName)(
             $this,
             $modulations,
             $this->NFCContext,

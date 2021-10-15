@@ -6,7 +6,8 @@ namespace Tests\Units\Drivers;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
-use NFC\Drivers\LibNFC\NFCDevice;
+use NFC\Contexts\NullContextProxy;
+use NFC\Drivers\RCS380\NFCDevice;
 use NFC\NFC;
 use NFC\NFCContext;
 use NFC\NFCDeviceNotFoundException;
@@ -67,21 +68,20 @@ class RCS380Test extends TestCase
 
         $stacks = $this->stackHandler->getStacks();
 
-        $this->assertContains('Start to listen on device dummy-device [dummy-1]', $stacks);
-        $this->assertContains('Touched target: 12345678', $stacks);
-        $this->assertContains('Released target: 12345678', $stacks);
+        $this->assertContains('Start to listen on device dummy-device [pn53x_usb:001:002]', $stacks);
+        $this->assertContains('Touched target: 1234567891011121', $stacks);
+        $this->assertContains('Released target: 1234567891011121', $stacks);
     }
 
     public function testStartWithSpecifyDevice()
     {
-        $device = new NFCDevice($this->NFCContext);
-        $device->open('dummy-2');
+        $device = $this->NFCContext->getDevices()[0]->getDevice();
 
         $this->NFCContext->start($device);
         $stacks = $this->stackHandler->getStacks();
 
-        $this->assertContains('Start to listen on device dummy-device [dummy-2]', $stacks);
-        $this->assertContains('Touched target: 12345678', $stacks);
-        $this->assertContains('Released target: 12345678', $stacks);
+        $this->assertContains('Start to listen on device dummy-device [pn53x_usb:001:002]', $stacks);
+        $this->assertContains('Touched target: 1234567891011121', $stacks);
+        $this->assertContains('Released target: 1234567891011121', $stacks);
     }
 }
