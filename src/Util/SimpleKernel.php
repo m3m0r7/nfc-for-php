@@ -20,6 +20,9 @@ abstract class SimpleKernel implements NFCInterface
     protected array $autoScanLocationsForUnix = [
         '/usr/local/lib',
         '/usr/lib',
+
+        // Debian
+        '/usr/lib/arm-linux-gnueabihf',
     ];
 
     protected string $defaultLogFileName = 'nfc-for-php.log';
