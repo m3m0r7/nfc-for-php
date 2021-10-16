@@ -10,7 +10,9 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
 
 # Tested
 
-- Mac Big Sur
+- OS
+  - Mac Big Sur
+  - RaspberryPi (Raspbian)
 - FeliCa
   - PASMO
   - Suica
@@ -87,6 +89,17 @@ $ php examples/rcs380-nfc-poll-simple.php
 # How to use
 
 - See examples
+
+# Troubleshooting
+
+## Q. How to recognize a device?
+A. You must have granted permission to user.
+I already test on RaspberryPI (Raspbian), it should grant to access permission to `/dev/*` or using super user (e.g., the root user).
+If you did not have permissions, cannot recognize a device on your environment and the libusb return an error `LIBUSB_ERROR_ACCESS`.
+
+## Q. Cannot start second time or later on macOS
+A. You must reconnect the connected USB plug because libnfc/libusb return an invalid packet in the macOS when second time or later.
+I don't know how to fix it.
 
 # License
 - MIT
