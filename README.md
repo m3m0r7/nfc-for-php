@@ -62,7 +62,7 @@ $ php examples/nfc-poll-simple.php
 
 ### RC-S380
 
-1. Install libnfc
+1. Install libusb
 
 ```
 $ brew install libusb
