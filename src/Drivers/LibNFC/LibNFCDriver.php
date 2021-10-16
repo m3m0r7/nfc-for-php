@@ -95,9 +95,12 @@ class LibNFCDriver implements DriverInterface
     {
         $this->validateContextOpened();
 
-        return $this
-            ->NFCContext->getFFI()
-            ->nfc_version();
+        return sprintf(
+            "LibNFC Driver (using %s)",
+            $this
+                ->NFCContext->getFFI()
+                ->nfc_version()
+        );
     }
 
     public function findDeviceName(string $deviceName): NFCDeviceInterface

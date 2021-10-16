@@ -77,7 +77,10 @@ class RCS380Driver implements DriverInterface
 
     public function getVersion(): string
     {
-        return "libusb-" . sprintf('0x%08X', LibUSBConstants::LIBUSB_API_VERSION);
+        return sprintf(
+            "RCS380 driver (using %s)",
+            "libusb-" . sprintf('0x%08X', LibUSBConstants::LIBUSB_API_VERSION)
+        );
     }
 
     public function getDevices(bool $includeCannotOpenDevices = false): array
