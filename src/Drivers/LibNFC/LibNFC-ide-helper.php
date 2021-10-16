@@ -6,6 +6,7 @@
 
 namespace NFC\Contexts
 {
+    return;
     /**
      * @method \FFI\CData nfc_context_new()
      * @method void nfc_context_free(\FFI\CData $context)

@@ -6,6 +6,7 @@
 
 namespace NFC\Contexts
 {
+    return;
     /**
      * @method int libusb_init(\FFI\CData $ctx)
      * @method void libusb_exit(\FFI\CData $ctx)
@@ -42,8 +43,8 @@ namespace NFC\Contexts
      * @method \FFI\CData libusb_get_parent(\FFI\CData $dev)
      * @method int libusb_get_device_address(\FFI\CData $dev)
      * @method int libusb_get_device_speed(\FFI\CData $dev)
-     * @method int libusb_get_max_packet_size(\FFI\CData $dev, char $endpoint)
-     * @method int libusb_get_max_iso_packet_size(\FFI\CData $dev, char $endpoint)
+     * @method int libusb_get_max_packet_size(\FFI\CData $dev, string $endpoint)
+     * @method int libusb_get_max_iso_packet_size(\FFI\CData $dev, string $endpoint)
      * @method int libusb_wrap_sys_device(\FFI\CData $ctx, \FFI\CData $sys_dev, \FFI\CData $dev_handle)
      * @method int libusb_open(\FFI\CData $dev, \FFI\CData $dev_handle)
      * @method void libusb_close(\FFI\CData $dev_handle)
@@ -53,7 +54,7 @@ namespace NFC\Contexts
      * @method int libusb_release_interface(\FFI\CData $dev_handle, int $interface_number)
      * @method \FFI\CData libusb_open_device_with_vid_pid(\FFI\CData $ctx, \FFI\CData $vendor_id, \FFI\CData $product_id)
      * @method int libusb_set_interface_alt_setting(\FFI\CData $dev_handle, int $interface_number, int $alternate_setting)
-     * @method int libusb_clear_halt(\FFI\CData $dev_handle, char $endpoint)
+     * @method int libusb_clear_halt(\FFI\CData $dev_handle, string $endpoint)
      * @method int libusb_reset_device(\FFI\CData $dev_handle)
      * @method int libusb_alloc_streams(\FFI\CData $dev_handle, \FFI\CData $num_streams, string $endpoints, int $num_endpoints)
      * @method int libusb_free_streams(\FFI\CData $dev_handle, string $endpoints, int $num_endpoints)
@@ -69,10 +70,10 @@ namespace NFC\Contexts
      * @method void libusb_free_transfer(\FFI\CData $transfer)
      * @method void libusb_transfer_set_stream_id(\FFI\CData $transfer, \FFI\CData $stream_id)
      * @method int libusb_transfer_get_stream_id(\FFI\CData $transfer)
-     * @method int libusb_control_transfer(\FFI\CData $dev_handle, int $request_type, int $bRequest, \FFI\CData $wValue, \FFI\CData $wIndex, string $data, \FFI\CData $wLength, int $timeout)
-     * @method int libusb_bulk_transfer(\FFI\CData $dev_handle, char $endpoint, string $data, int $length, \FFI\CData $actual_length, int $timeout)
-     * @method int libusb_interrupt_transfer(\FFI\CData $dev_handle, char $endpoint, string $data, int $length, \FFI\CData $actual_length, int $timeout)
-     * @method int libusb_get_string_descriptor_ascii(\FFI\CData $dev_handle, int $desc_index, string $data, int $length)
+     * @method int libusb_control_transfer(\FFI\CData $dev_handle, int $request_type, int $bRequest, \FFI\CData $wValue, \FFI\CData $wIndex, \FFI\CData $data, \FFI\CData $wLength, int $timeout)
+     * @method int libusb_bulk_transfer(\FFI\CData $dev_handle, string $endpoint, \FFI\CData $data, int $length, \FFI\CData $actual_length, int $timeout)
+     * @method int libusb_interrupt_transfer(\FFI\CData $dev_handle, string $endpoint, \FFI\CData $data, int $length, \FFI\CData $actual_length, int $timeout)
+     * @method int libusb_get_string_descriptor_ascii(\FFI\CData $dev_handle, int $desc_index, \FFI\CData $data, int $length)
      * @method int libusb_try_lock_events(\FFI\CData $ctx)
      * @method void libusb_lock_events(\FFI\CData $ctx)
      * @method void libusb_unlock_events(\FFI\CData $ctx)
