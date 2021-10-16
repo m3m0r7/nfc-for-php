@@ -146,6 +146,10 @@ class RCS380Driver implements DriverInterface
                         ))->open($connection, $includeCannotOpenDevices),
                     );
                 } catch (NFCDeviceException $e) {
+                    $this->NFCContext
+                        ->getNFC()
+                        ->getLogger()
+                        ->info("Cannot open: {$connection}");
                 }
             }
         } finally {
