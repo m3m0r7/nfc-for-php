@@ -5,8 +5,8 @@ This library is a toy for me. You can read NFC with libnfc written in PHP.
 # Requirements
 - PHP 7.4+
 - PHP FFI
-- libnfc (_if you use NFC reader for PaSoRi RC-S330_)
-- libusb (_if you use NFC reader for PaSoRi RC-S380_)
+- libnfc 1.8.0 (_if you use NFC reader for PaSoRi RC-S330_)
+- libusb 1.0.24 (_if you use NFC reader for PaSoRi RC-S380_)
 
 # Tested
 

@@ -15,4 +15,9 @@ class OS
     {
         return PHP_OS === 'Darwin';
     }
+
+    public static function isLinux(): bool
+    {
+        return PHP_OS === 'Linux';
+    }
 }

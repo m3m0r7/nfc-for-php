@@ -8,7 +8,9 @@ use NFC\NFCEventManager;
 
 $NFC = new NFC(
     \NFC\Drivers\RCS380\Kernel::class,
-    '/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.dylib'
+    \NFC\Util\OS::isMac()
+        ? '/usr/local/Cellar/libusb/1.0.24/lib/libusb-1.0.dylib'
+        : '/usr/local/lib/libusb-1.0.so',
 );
 $context = $NFC->createContext(
     (new \NFC\NFCEventManager())

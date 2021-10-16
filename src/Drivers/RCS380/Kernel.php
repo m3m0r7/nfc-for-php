@@ -18,9 +18,9 @@ class Kernel extends SimpleKernel
         'libusb.dylib',
         'libusb-1.0.dylib',
         'libusb.so',
-        'libusb-1.0.0.so',
+        'libusb-1.0.so',
         'libusb.dll',
-        'libusb-1.0.0.dll',
+        'libusb-1.0.dll',
     ];
 
     protected string $driverClassName = RCS380Driver::class;
