@@ -12,9 +12,14 @@ $NFC = new NFC(
 );
 $context = $NFC->createContext();
 
+$devices = $context->getDevices(true);
 /**
  * @var \NFC\NFCDeviceInfo $device
  */
-foreach ($context->getDevices(true) as $device) {
+foreach ($devices as $device) {
     echo "{$device->getDeviceName()} [{$device->getConnectionTarget()}]\n";
+}
+
+if (empty($devices)) {
+    echo "No device founds\n";
 }
