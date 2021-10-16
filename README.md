@@ -85,6 +85,84 @@ $ php examples/rcs380-nfc-poll-simple.php
 5. Put your NFC
 6. You can get output.
 
+# NFC binary
+
+We're providing NFC binary in `vendor/bin`.
+And you can use 3 commands `start`, `ls` and `version`
+
+
+## start
+
+Start to listen NFC reader.
+
+```
+./vendor/bin/nfc start
+```
+
+You can change the driver if you want to use other driver.
+
+```
+./vendor/bin/nfc start -D DriverName
+```
+
+You can specify hook events in CLI command.
+
+```
+./vendor/bin/nfc start -E /path/to/events.php
+```
+
+For example, you can use example file.
+
+```
+./vendor/bin/nfc start -E ./vendor/m3m0r7/nfc-for-php/examples/event-manager.php
+```
+
+
+And you want to more details, please run below command.
+
+```
+./vendor/bin/nfc start --help
+```
+
+## ls
+
+Show available devices.
+
+```
+./vendor/bin/nfc ls
+```
+
+You can change the driver if you want to use other driver.
+
+```
+./vendor/bin/nfc ls -D DriverName
+```
+
+And you want to more details, please run below command.
+
+```
+./vendor/bin/nfc ls --help
+```
+
+## version
+
+Show PHP driver version.
+
+```
+./vendor/bin/nfc version
+```
+
+You can change the driver if you want to use other driver.
+
+```
+./vendor/bin/nfc version -D DriverName
+```
+
+And you want to more details, please run below command.
+
+```
+./vendor/bin/nfc version --help
+```
 
 # How to use
 
