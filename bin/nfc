@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+foreach (['../vendor', 'vendor', '..'] as $dir) {
+    $path = __DIR__ . "/{$dir}/autoload.php";
+    if (!is_file($path)) {
+        continue;
+    }
+    require $path;
+}
+
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+$application->add($start = new \NFC\Commands\StartCommand());
+$application->add(new \NFC\Commands\LsCommand());
+$application->add(new \NFC\Commands\VersionCommand());
+$application->run();

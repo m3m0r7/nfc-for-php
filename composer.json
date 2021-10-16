@@ -8,6 +8,9 @@
       "name": "memory"
     }
   ],
+  "bin": [
+    "bin/nfc"
+  ],
   "require": {
     "php": ">=7.4|>=8",
     "ext-ffi": "*",
