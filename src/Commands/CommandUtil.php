@@ -65,7 +65,7 @@ trait CommandUtil
                 $output->writeln("<error>The specified event manager `{$file}` is not found</error>");
                 return null;
             }
-            $loadedFile = require $file;
+            $loadedFile = include $file;
 
             if (!($loadedFile instanceof NFCEventManager)) {
                 $output->writeln("<error>The specified event manager `{$file}` is invalid</error>");

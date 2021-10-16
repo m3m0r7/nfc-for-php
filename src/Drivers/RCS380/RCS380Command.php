@@ -100,10 +100,12 @@ class RCS380Command
             )
         );
 
-        $expectedReceivedPacket = static::toChar([
+        $expectedReceivedPacket = static::toChar(
+            [
             0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
             0xD7, 0x2B, 0x00, 0xFE,
-        ]);
+            ]
+        );
         if ($received !== $expectedReceivedPacket) {
             throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
         }
@@ -119,10 +121,12 @@ class RCS380Command
             )
         );
 
-        $expectedReceivedPacket = static::toChar([
+        $expectedReceivedPacket = static::toChar(
+            [
             0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
             0xD7, 0x07, 0x00, 0x22
-        ]);
+            ]
+        );
         if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
             throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
         }
@@ -135,22 +139,24 @@ class RCS380Command
         $byteArray = [];
 
         switch ($type) {
-            case $this->modulationTypes->NMT_FELICA:
-                $byteArray = [
-                    0x00, 0x01, 0x01, 0x0F, 0x01,
-                ];
-                break;
-            default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
+        case $this->modulationTypes->NMT_FELICA:
+            $byteArray = [
+                0x00, 0x01, 0x01, 0x0F, 0x01,
+            ];
+            break;
+        default:
+            throw new RCS380CommandException('Specify type is not implemented yet [' . $this->type . ']');
         }
 
         $received = $this->communicate(
             static::toChar($byteArray)
         );
 
-        $expectedReceivedPacket = static::toChar([
+        $expectedReceivedPacket = static::toChar(
+            [
             0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7, 0x01, 0x00, 0x28
-        ]);
+            ]
+        );
         if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
             throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
         }
@@ -172,12 +178,16 @@ class RCS380Command
             )
         );
 
-        $expectedReceivedPacket1 = static::toChar([
+        $expectedReceivedPacket1 = static::toChar(
+            [
             0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7
-        ]);
-        $expectedReceivedPacket2 = static::toChar([
+            ]
+        );
+        $expectedReceivedPacket2 = static::toChar(
+            [
             0x00, 0x26
-        ]);
+            ]
+        );
         if ($received !== static::NOP && substr($received, 0, strlen($expectedReceivedPacket1)) !== $expectedReceivedPacket1 || substr($received, -1 * strlen($expectedReceivedPacket2)) !== $expectedReceivedPacket2) {
             throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "]");
         }
@@ -189,13 +199,13 @@ class RCS380Command
     {
         $byteArray = [];
         switch ($type) {
-            case $this->modulationTypes->NMT_FELICA:
-                $byteArray = [
-                    0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
-                ];
-                break;
-            default:
-                throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
+        case $this->modulationTypes->NMT_FELICA:
+            $byteArray = [
+                0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18,
+            ];
+            break;
+        default:
+            throw new RCS380CommandException('Specify type is not implemented yet [' . $type . ']');
         }
 
         $received = $this->communicate(
@@ -203,9 +213,11 @@ class RCS380Command
             false
         );
 
-        $expectedReceivedPacket = static::toChar([
+        $expectedReceivedPacket = static::toChar(
+            [
             0x00, 0x00, 0xFF, 0x01, 0xFF, 0x7F, 0x81
-        ]);
+            ]
+        );
         if ($received !== static::NOP && $received !== $expectedReceivedPacket) {
             throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($received, false) . "/" . Util::toHex($expectedReceivedPacket, false) . "]");
         }
@@ -297,9 +309,9 @@ class RCS380Command
         $receivedACK = $this->receivePacket($this->timeout);
 
         // Packet validation
-//        if ($receivedACK !== static::NOP) {
-//            throw new ReceivePacketException("ACK/NCK packet is invalid [" . Util::toHex($receivedACK, false) . "]");
-//        }
+        //        if ($receivedACK !== static::NOP) {
+        //            throw new ReceivePacketException("ACK/NCK packet is invalid [" . Util::toHex($receivedACK, false) . "]");
+        //        }
 
         $this->NFCContext
             ->getNFC()
@@ -309,11 +321,11 @@ class RCS380Command
         // Receive response
         $receivedResponse = $this->receivePacket($this->timeout);
 
-//        if ($validateMagic) {
-//            if ($receivedResponse !== static::NOP && substr($receivedResponse, 0, strlen(static::MAGIC)) !== static::MAGIC) {
-//                throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($receivedResponse, false) . "]");
-//            }
-//        }
+        //        if ($validateMagic) {
+        //            if ($receivedResponse !== static::NOP && substr($receivedResponse, 0, strlen(static::MAGIC)) !== static::MAGIC) {
+        //                throw new ReceivePacketException("Response packet is invalid [" . Util::toHex($receivedResponse, false) . "]");
+        //            }
+        //        }
 
         $this->NFCContext
             ->getNFC()

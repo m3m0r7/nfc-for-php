@@ -48,12 +48,14 @@ class LsCommand extends Command
                     continue;
                 }
                 $connectionTarget = explode(':', $device->getConnectionTarget());
-                $output->writeln(sprintf(
-                    'Bus: %03s Device %03s: %s',
-                    $connectionTarget[1],
-                    $connectionTarget[2],
-                    $device->getDevice()->getDeviceName()
-                ));
+                $output->writeln(
+                    sprintf(
+                        'Bus: %03s Device %03s: %s',
+                        $connectionTarget[1],
+                        $connectionTarget[2],
+                        $device->getDevice()->getDeviceName()
+                    )
+                );
 
                 $counter++;
             }

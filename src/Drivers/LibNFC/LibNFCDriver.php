@@ -305,7 +305,8 @@ class LibNFCDriver implements DriverInterface
                 NFCConstants::NFC_SUCCESS,
                 ],
             true
-        )) {
+        )
+        ) {
             throw new NFCException(
                 "An error occurred: {$device->getLastErrorName()}({$device->getLastErrorCode()})"
             );

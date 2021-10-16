@@ -14,51 +14,65 @@ class MockedRCS380Command extends RCS380Command
     {
         // SetCommandType
         if ($commandData === static::toChar([static::SetCommandType, 0x01])) {
-            return static::toChar([
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
                 0xD7, 0x2B, 0x00, 0xFE,
-            ]);
+                ]
+            );
         }
 
         // SwitchRF
         if ($commandData === static::toChar([static::SwitchRF, 0x00])) {
-            return static::toChar([
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD,
                 0xD7, 0x07, 0x00, 0x22
-            ]);
+                ]
+            );
         }
 
         // InSetRF - 1
         if ($commandData === static::toChar([0x00, 0x01, 0x01, 0x0F, 0x01])) {
-            return static::toChar([
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7, 0x01, 0x00, 0x28
-            ]);
+                ]
+            );
         }
 
         // InSetRF - 2
-        if ($commandData === static::toChar([
+        if ($commandData === static::toChar(
+            [
             static::InSetProtocol, 0x00, 0x18, 0x01, 0x01, 0x02, 0x01, 0x03,
             0x00, 0x04, 0x00, 0x05, 0x00, 0x06, 0x00, 0x07,
             0x08, 0x08, 0x00, 0x09, 0x00, 0x0a, 0x00, 0x0b,
             0x00, 0x0c, 0x00, 0x0e, 0x04, 0x0f, 0x00, 0x10,
             0x00, 0x11, 0x00, 0x12, 0x00, 0x13, 0x06
-        ])) {
-            return static::toChar([
+            ]
+        )
+        ) {
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0xFD, 0xD7,
                 0x00, 0x26,
-            ]);
+                ]
+            );
         }
 
         // InSetRF - 3
         if ($commandData === static::toChar([0x00, 0x01, 0x01, 0x0F, 0x01, 0x02, 0x00, 0x18])) {
-            return static::toChar([
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0x01, 0xFF, 0x7F, 0x81
-            ]);
+                ]
+            );
         }
 
         // InCommRF
         if ($commandData === static::toChar([static::InCommRF, 0x6e, 0x00, 0x06, 0x00, 0xff, 0xff, 0x01, 0x00])) {
-            return static::toChar([
+            return static::toChar(
+                [
                 0x00, 0x00, 0xFF, 0xFF, 0xFF,
 
                 // Null filled dummy packet
@@ -73,8 +87,11 @@ class MockedRCS380Command extends RCS380Command
 
                 // SC
                 0x12, 0x34,
-            ]);
+                ]
+            );
         }
+
+        return static::toChar([0x00]);
     }
 
     public function sendRawPacket(string $commandData): int
