@@ -124,7 +124,7 @@ class RCS380Driver implements DriverInterface
                     );
 
                 if ($errorCode < 0) {
-                    throw new NFCDeviceException('Cannot get device descriptor [' . $errorCode . ']');
+                    throw new NFCDeviceException("Cannot get device descriptor [{$this->NFCContext->getFFI()->libusb_error_name($errorCode)} ({$errorCode})]");
                 }
 
                 if ($deviceDescriptor->idVendor !== static::VENDOR_ID && $deviceDescriptor->idProduct !== static::PRODUCT_ID) {

@@ -17,4 +17,9 @@ class MockedRCS380NFCDevice extends NFCDevice
             'out' => [1],
         ];
     }
+
+    protected function hasDeviceContext(): bool
+    {
+        return true;
+    }
 }

@@ -70,11 +70,11 @@ class NFCDevice implements NFCDeviceInterface
                 \FFI::addr($this->deviceContext)
             );
 
-        if (\FFI::isNull($this->deviceContext) || ($this->lastError < 0 && !$forceOpen)) {
+        if (!$this->hasDeviceContext() || ($this->lastError < 0 && !$forceOpen)) {
             throw new NFCDeviceException("Cannot open a device [{$this->lastError}] [{$connection}]");
         }
 
-        $this->lastError = $this->NFCContext
+        $this->NFCContext
             ->getFFI()
             ->libusb_set_auto_detach_kernel_driver($this->deviceContext, 1);
 
@@ -262,5 +262,10 @@ class NFCDevice implements NFCDeviceInterface
                 "NFC Device not initialized. Please run `NFCDevice::open` before."
             );
         }
+    }
+
+    protected function hasDeviceContext(): bool
+    {
+        return !\FFI::isNull($this->deviceContext);
     }
 }
