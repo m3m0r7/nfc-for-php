@@ -1,3 +1,4 @@
 composer.lock
 vendor
 nfc-for-php.log
+.php-cs-fixer.cache

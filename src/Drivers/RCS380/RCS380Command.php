@@ -232,7 +232,6 @@ class RCS380Command
          */
         while (true) {
             foreach ($this->modulations as $modulation) {
-
                 if ($default !== null) {
                     if ($default->getModulationType() !== $modulation->getModulationType() || $default->getBaudRate() !== $modulation->getBaudRate()) {
                         continue;
