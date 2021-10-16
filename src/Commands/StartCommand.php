@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace NFC\Commands;
 
+use NFC\Drivers\LibNFC\NFCModulations;
+use NFC\Drivers\RCS380\RCS380Driver;
+use NFC\NFCDeviceNotFoundException;
+use NFC\NFCEventManager;
+use NFC\NFCModulation;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,10 +28,11 @@ class StartCommand extends Command
             ->defaultConfigure()
             ->addUsage('-D=rcs380 -E=/path/to/listen/event.php -N=SONY')
             ->addOption(
-                'device-types',
+                'device-type',
                 'T',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Set device types [felica, ]',
+                'Set device types [FeliCa]',
+                ['FeliCa']
             )
             ->addOption(
                 'event-manager',
@@ -59,20 +65,85 @@ class StartCommand extends Command
                 'max-retry',
                 'M',
                 InputOption::VALUE_OPTIONAL,
-                'Set max retry',
+                'Set max retry to send a command',
                 5
             )
             ->addOption(
                 'retry-interval',
                 'C',
                 InputOption::VALUE_OPTIONAL,
-                'Set retry interval (ms)',
+                'Set retry interval (ms) to send a command',
                 2000
+            )
+            ->addOption(
+                'enable-touch-adjustment',
+                'A',
+                InputOption::VALUE_OPTIONAL,
+                'Set touch adjustment',
+                '1'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $context = $this->createNFCContext($input, $output);
+
+        if ($context === null) {
+            return Command::INVALID;
+        }
+
+        $deviceName = $input->getOption('device-name');
+        $device =  null;
+
+        if (strtolower($deviceName) !== 'auto') {
+            $deviceName = (string) $deviceName;
+            try {
+                $device = $context
+                    ->findDeviceName(
+                        $deviceName
+                    );
+            } catch (NFCDeviceNotFoundException $e) {
+                $output->writeln("The specified device `{$deviceName}` not found");
+                return Command::INVALID;
+            }
+        } else {
+            $deviceName = null;
+        }
+
+        $modulations = new NFCModulations();
+        $modulationTypes = $context->getModulationsTypes();
+        $baudRates = $context->getBaudRates();
+
+        foreach ($input->getOption('device-type') as $deviceType) {
+            $loweredDeviceType = strtolower($deviceType);
+            if ($loweredDeviceType === 'felica') {
+                $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_212));
+                $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_424));
+            }
+        }
+
+        $context
+            ->enableContinuousTouchAdjustment((int) $input->getOption('enable-touch-adjustment') === 1);
+
+        $context
+            ->setWaitPresentationReleaseInterval((int) $input->getOption('wait-presentation-release-interval'));
+
+        $context
+            ->setPollingInterval((int) $input->getOption('polling-interval'));
+
+        $context
+            ->setWaitDidNotReleaseTimeout((int) $input->getOption('release-timeout'));
+
+        if ($context->getDriver() instanceof RCS380Driver) {
+            $context
+                ->setMaxRetry((int) $input->getOption('max-retry'));
+            $context
+                ->setRetryInterval((int) $input->getOption('retry-interval'));
+        }
+
+        $context
+            ->start($device, $modulations);
+
         return Command::SUCCESS;
     }
 }

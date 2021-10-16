@@ -14,4 +14,10 @@ trait ReaderReleasable
         $this->waitPresentationReleaseInterval = $ms;
         return $this;
     }
+
+    public function setWaitDidNotReleaseTimeout(int $s): self
+    {
+        $this->waitDidNotReleaseTimeout = $s;
+        return $this;
+    }
 }

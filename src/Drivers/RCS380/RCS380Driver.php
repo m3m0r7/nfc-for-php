@@ -6,7 +6,6 @@ namespace NFC\Drivers\RCS380;
 
 use NFC\Collections\NFCModulationsInterface;
 use NFC\Contexts\ContextProxyInterface;
-use NFC\Contexts\NullContextProxy;
 use NFC\Drivers\DriverInterface;
 use NFC\Drivers\RCS380\Headers\LibUSBConstants;
 use NFC\NFCBaudRatesInterface;
@@ -25,12 +24,14 @@ use NFC\Util\PredefinedModulations;
 use NFC\Util\ReaderAdjustable;
 use NFC\Util\ReaderPollable;
 use NFC\Util\ReaderReleasable;
+use NFC\Util\ReaderRetryable;
 
 class RCS380Driver implements DriverInterface
 {
     use ReaderPollable;
     use ReaderAdjustable;
     use ReaderReleasable;
+    use ReaderRetryable;
 
     protected const VERSION = '0.0.1';
     public const VENDOR_ID = 0x054C;
@@ -231,7 +232,9 @@ class RCS380Driver implements DriverInterface
             $this,
             $modulations,
             $this->NFCContext,
-            $device
+            $device,
+            $this->maxRetry,
+            $this->retryInterval
         );
 
         $this->NFCContext

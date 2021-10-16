@@ -11,6 +11,7 @@ use NFC\NFCContext;
 use NFC\NFCDeviceInterface;
 use NFC\NFCModulationTypesInterface;
 use NFC\NFCTargetInterface;
+use NFC\Util\PredefinedModulations;
 
 interface DriverInterface
 {

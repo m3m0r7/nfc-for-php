@@ -21,7 +21,8 @@ class VersionCommand extends Command
     protected function configure(): void
     {
         $this
-            ->defaultConfigure();
+            ->defaultConfigure()
+            ->addUsage('-D=rcs380');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

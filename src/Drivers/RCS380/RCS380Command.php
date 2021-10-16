@@ -21,8 +21,6 @@ use NFC\Util\Util;
 class RCS380Command
 {
     public const MAX_RECEIVED_BUFFER_SIZE = 255;
-    public const TRY_MIXED_POLL_COUNT = 5;
-    public const WAIT_RETRY_TIME = 2;
 
     public const MAGIC = "\x00\x00\xFF\xFF\xFF";
     protected const NOP = "\x00\x00\xFF\x00\xFF";
@@ -61,15 +59,26 @@ class RCS380Command
     protected RCS380Driver $driver;
 
     protected int $timeout = 10;
+    protected int $retryMax;
+    protected int $retryInterval;
 
-    public function __construct(RCS380Driver $driver, NFCModulationsInterface $modulations, NFCContext $NFCContext, NFCDevice $NFCDevice)
-    {
+    public function __construct(
+        RCS380Driver $driver,
+        NFCModulationsInterface $modulations,
+        NFCContext $NFCContext,
+        NFCDevice $NFCDevice,
+        int $retryMax = 5,
+        int $retryInterval = 2000
+    ) {
         $this->driver = $driver;
         $this->NFCContext = $NFCContext;
         $this->NFCDevice = $NFCDevice;
 
         $this->modulationTypes = new NFCModulationTypes($NFCContext->getFFI());
         $this->modulations = $modulations;
+
+        $this->retryMax = $retryMax;
+        $this->retryInterval = $retryInterval;
     }
 
     public function init(): self
@@ -223,7 +232,7 @@ class RCS380Command
                 $this->inSetProtocol1();
                 $this->inSetProtocol2($modulation->getModulationType());
 
-                $remainingTries = static::TRY_MIXED_POLL_COUNT;
+                $remainingTries = $this->retryMax;
                 do {
                     $response = $this->inCommRF($modulation->getModulationType());
                     if ($response !== null) {
@@ -233,7 +242,7 @@ class RCS380Command
                         ];
                     }
                 } while ($response === null && $remainingTries-- >= 0);
-                sleep(static::WAIT_RETRY_TIME);
+                usleep($this->retryInterval);
             }
         }
     }

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace NFC\Commands;
 
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use NFC\NFC;
 use NFC\NFCContext;
+use NFC\NFCEventManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,10 +26,6 @@ trait CommandUtil
     protected function defaultConfigure(): self
     {
         return $this
-//            ->addUsage('start --d=rcs380 -e=/path/to/listen/event.php -dn=SONY')
-//            ->addUsage('list -d=rcs380')
-//            ->addUsage('list -d=rcs380 -dn=SONY')
-//            ->addUsage('version -d=rcs380')
             ->addOption(
                 'driver',
                 'D',
@@ -58,7 +58,51 @@ trait CommandUtil
             return null;
         }
 
+        $eventManager = new NFCEventManager();
+
+        foreach ($input->getOption('event-manager') ?? [] as $file) {
+            if (!is_file($file)) {
+                $output->writeln("<error>The specified event manager `{$file}` is not found</error>");
+                return null;
+            }
+            $loadedFile = require $file;
+
+            if (!($loadedFile instanceof NFCEventManager)) {
+                $output->writeln("<error>The specified event manager `{$file}` is invalid</error>");
+                return null;
+            }
+            $eventManager->merge($loadedFile);
+        }
+
+
+        $verbose = (int) $input->getOption('verbose');
+
         $kernel = new NFC(static::$drivers[$driverName]);
-        return $kernel->createContext();
+        $logger = new Logger($driverName);
+        $handler = new StreamHandler(
+            'php://stdout',
+            $verbose <= 1
+                ? Logger::WARNING
+                : (
+                    $verbose === 2
+                        ? Logger::INFO
+                        : Logger::DEBUG
+                ),
+        );
+
+        $handler->setFormatter(
+            new LineFormatter(
+                "[%datetime%] %level_name%: %message%\n",
+                'Y-m-d H:i:s',
+                true
+            )
+        );
+
+        $logger
+            ->pushHandler($handler);
+
+        $kernel->setLogger($logger);
+
+        return $kernel->createContext($eventManager);
     }
 }

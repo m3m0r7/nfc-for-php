@@ -19,7 +19,9 @@ class LsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->defaultConfigure();
+            ->defaultConfigure()
+            ->addUsage('-D=rcs380')
+            ->addUsage('-D=rcs380 -N=SONY');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
