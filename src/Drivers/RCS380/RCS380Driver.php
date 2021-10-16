@@ -136,14 +136,17 @@ class RCS380Driver implements DriverInterface
                         ->libusb_get_device_address($selectedDevice),
                 );
 
-                $deviceInfo[] = new NFCDeviceInfo(
-                    $connection,
-                    (new ($this->NFCDeviceClassName)(
-                        $this->NFCContext,
-                        new SelectedDeviceContextProxy($selectedDevice),
-                        new DeviceDescriptorContextProxy($deviceDescriptor),
-                    ))->open($connection, $includeCannotOpenDevices),
-                );
+                try {
+                    $deviceInfo[] = new NFCDeviceInfo(
+                        $connection,
+                        (new ($this->NFCDeviceClassName)(
+                            $this->NFCContext,
+                            new SelectedDeviceContextProxy($selectedDevice),
+                            new DeviceDescriptorContextProxy($deviceDescriptor),
+                        ))->open($connection, $includeCannotOpenDevices),
+                    );
+                } catch (NFCDeviceException $e) {
+                }
             }
         } finally {
             $this->NFCContext
