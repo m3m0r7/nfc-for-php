@@ -21,7 +21,7 @@ class StartCommand extends Command
     {
         $this
             ->defaultConfigure()
-            ->addUsage('--d=rcs380 -e=/path/to/listen/event.php -dn=SONY')
+            ->addUsage('-D=rcs380 -E=/path/to/listen/event.php -N=SONY')
             ->addOption(
                 'device-types',
                 'T',
