@@ -24,47 +24,47 @@ class StartCommand extends Command
             ->addUsage('--d=rcs380 -e=/path/to/listen/event.php -dn=SONY')
             ->addOption(
                 'device-types',
-                'dt',
+                'T',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Set device types [felica, ]',
             )
             ->addOption(
                 'event-manager',
-                'e',
+                'E',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Set event manager file path [e.g. /path/to/listen/event.php]',
             )
             ->addOption(
                 'polling-interval',
-                'pi',
+                'P',
                 InputOption::VALUE_OPTIONAL,
                 'Set polling interval (ms)',
                 250
             )
             ->addOption(
                 'release-timeout',
-                'rt',
+                'R',
                 InputOption::VALUE_OPTIONAL,
                 'Set NFC tag/card release timeout (ms)',
                 30
             )
             ->addOption(
                 'wait-presentation-release-interval',
-                'ri',
+                'W',
                 InputOption::VALUE_OPTIONAL,
                 'Set wait presentation release interval (ms)',
                 250
             )
             ->addOption(
                 'max-retry',
-                'rc',
+                'M',
                 InputOption::VALUE_OPTIONAL,
                 'Set max retry',
                 5
             )
             ->addOption(
                 'retry-interval',
-                'rin',
+                'C',
                 InputOption::VALUE_OPTIONAL,
                 'Set retry interval (ms)',
                 2000

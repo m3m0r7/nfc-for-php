@@ -26,15 +26,11 @@ class VersionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $driverName = $input->getOption('driver');
+        $context = $this->createNFCContext($input, $output);
 
-        if (!in_array($driverName, array_keys(static::$drivers), true)) {
-            $output->writeln("<error>The specified driver name `{$driverName}` is not found</error>");
+        if ($context === null) {
             return Command::INVALID;
         }
-
-        $kernel = new NFC(static::$drivers[$driverName]);
-        $context = $kernel->createContext();
 
         $output->writeln("{$context->getVersion()}");
 
