@@ -35,6 +35,8 @@ class LibNFCDriver implements DriverInterface
     use ReaderAdjustable;
     use ReaderReleasable;
 
+    protected const VERSION = '0.0.1';
+
     protected ?ContextProxyInterface $context = null;
     protected ?NFCContext $NFCContext = null;
 
@@ -96,7 +98,8 @@ class LibNFCDriver implements DriverInterface
         $this->validateContextOpened();
 
         return sprintf(
-            "LibNFC Driver (using %s)",
+            "LibNFC Driver %s (using %s)",
+            static::VERSION,
             $this
                 ->NFCContext->getFFI()
                 ->nfc_version()

@@ -32,6 +32,7 @@ class RCS380Driver implements DriverInterface
     use ReaderAdjustable;
     use ReaderReleasable;
 
+    protected const VERSION = '0.0.1';
     public const VENDOR_ID = 0x054C;
     public const PRODUCT_ID = 0x06C3;
 
@@ -78,7 +79,8 @@ class RCS380Driver implements DriverInterface
     public function getVersion(): string
     {
         return sprintf(
-            "RCS380 driver (using %s)",
+            "RCS380 driver %s (using %s)",
+            static::VERSION,
             "libusb-" . sprintf('0x%08X', LibUSBConstants::LIBUSB_API_VERSION)
         );
     }
