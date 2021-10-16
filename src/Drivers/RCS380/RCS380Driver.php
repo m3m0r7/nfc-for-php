@@ -79,7 +79,7 @@ class RCS380Driver implements DriverInterface
     public function getVersion(): string
     {
         return sprintf(
-            "RCS380 driver %s (using %s)",
+            "PaSoRi Sony RCS380 driver %s (using %s)",
             static::VERSION,
             "libusb-" . sprintf('0x%08X', LibUSBConstants::LIBUSB_API_VERSION)
         );
