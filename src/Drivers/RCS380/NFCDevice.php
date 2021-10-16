@@ -83,7 +83,9 @@ class NFCDevice implements NFCDeviceInterface
             ->libusb_set_configuration($this->deviceContext, 1);
 
         if ($this->lastError < 0) {
-            throw new NFCDeviceException("Cannot open a device [{$this->lastError}] [{$connection}]");
+            throw new NFCDeviceException(
+                "Cannot open a device [{$this->NFCContext->getFFI()->libusb_error_name($this->lastError)} ({$this->lastError})] [{$connection}]"
+            );
         }
 
         $this->lastError = $this->NFCContext
@@ -91,7 +93,9 @@ class NFCDevice implements NFCDeviceInterface
             ->libusb_claim_interface($this->deviceContext, 0);
 
         if ($this->lastError < 0) {
-            throw new NFCDeviceException("Cannot open a device [{$this->lastError}] [{$connection}]");
+            throw new NFCDeviceException(
+                "Cannot open a device [{$this->NFCContext->getFFI()->libusb_error_name($this->lastError)} ({$this->lastError})] [{$connection}]"
+            );
         }
 
         $this->lastError = $this->NFCContext
@@ -99,7 +103,9 @@ class NFCDevice implements NFCDeviceInterface
             ->libusb_set_interface_alt_setting($this->deviceContext, 0, 0);
 
         if ($this->lastError < 0) {
-            throw new NFCDeviceException("Cannot open a device [{$this->lastError}] [{$connection}]");
+            throw new NFCDeviceException(
+                "Cannot open a device [{$this->NFCContext->getFFI()->libusb_error_name($this->lastError)} ({$this->lastError})] [{$connection}]"
+            );
         }
 
         $this->transportEndpoint = $this->getTransportEndpoint();

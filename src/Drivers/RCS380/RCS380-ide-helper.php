@@ -71,7 +71,7 @@ namespace NFC\Contexts
      * @method void libusb_transfer_set_stream_id(\FFI\CData $transfer, \FFI\CData $stream_id)
      * @method int libusb_transfer_get_stream_id(\FFI\CData $transfer)
      * @method int libusb_control_transfer(\FFI\CData $dev_handle, int $request_type, int $bRequest, \FFI\CData $wValue, \FFI\CData $wIndex, \FFI\CData $data, \FFI\CData $wLength, int $timeout)
-     * @method int libusb_bulk_transfer(\FFI\CData $dev_handle, string $endpoint, \FFI\CData $data, int $length, \FFI\CData $actual_length, int $timeout)
+     * @method int libusb_bulk_transfer(\FFI\CData $dev_handle, int $endpoint, \FFI\CData $data, int $length, \FFI\CData $actual_length, int $timeout)
      * @method int libusb_interrupt_transfer(\FFI\CData $dev_handle, string $endpoint, \FFI\CData $data, int $length, \FFI\CData $actual_length, int $timeout)
      * @method int libusb_get_string_descriptor_ascii(\FFI\CData $dev_handle, int $desc_index, \FFI\CData $data, int $length)
      * @method int libusb_try_lock_events(\FFI\CData $ctx)

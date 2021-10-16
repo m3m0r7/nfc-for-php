@@ -86,63 +86,68 @@ class StartCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $context = $this->createNFCContext($input, $output);
+        try {
+            $context = $this->createNFCContext($input, $output);
 
-        if ($context === null) {
-            return Command::INVALID;
-        }
-
-        $deviceName = $input->getOption('device-name');
-        $device =  null;
-
-        if (strtolower($deviceName) !== 'auto') {
-            $deviceName = (string) $deviceName;
-            try {
-                $device = $context
-                    ->findDeviceName(
-                        $deviceName
-                    );
-            } catch (NFCDeviceNotFoundException $e) {
-                $output->writeln("The specified device `{$deviceName}` not found");
+            if ($context === null) {
                 return Command::INVALID;
             }
-        } else {
-            $deviceName = null;
-        }
 
-        $modulations = new NFCModulations();
-        $modulationTypes = $context->getModulationsTypes();
-        $baudRates = $context->getBaudRates();
+            $deviceName = $input->getOption('device-name');
+            $device = null;
 
-        foreach ($input->getOption('device-type') as $deviceType) {
-            $loweredDeviceType = strtolower($deviceType);
-            if ($loweredDeviceType === 'felica') {
-                $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_212));
-                $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_424));
+            if (strtolower($deviceName) !== 'auto') {
+                $deviceName = (string)$deviceName;
+                try {
+                    $device = $context
+                        ->findDeviceName(
+                            $deviceName
+                        );
+                } catch (NFCDeviceNotFoundException $e) {
+                    $output->writeln("The specified device `{$deviceName}` not found");
+                    return Command::INVALID;
+                }
+            } else {
+                $deviceName = null;
             }
-        }
 
-        $context
-            ->enableContinuousTouchAdjustment((int) $input->getOption('enable-touch-adjustment') === 1);
+            $modulations = new NFCModulations();
+            $modulationTypes = $context->getModulationsTypes();
+            $baudRates = $context->getBaudRates();
 
-        $context
-            ->setWaitPresentationReleaseInterval((int) $input->getOption('wait-presentation-release-interval'));
+            foreach ($input->getOption('device-type') as $deviceType) {
+                $loweredDeviceType = strtolower($deviceType);
+                if ($loweredDeviceType === 'felica') {
+                    $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_212));
+                    $modulations->add(new NFCModulation($modulationTypes->NMT_FELICA, $baudRates->NBR_424));
+                }
+            }
 
-        $context
-            ->setPollingInterval((int) $input->getOption('polling-interval'));
-
-        $context
-            ->setWaitDidNotReleaseTimeout((int) $input->getOption('release-timeout'));
-
-        if ($context->getDriver() instanceof RCS380Driver) {
             $context
-                ->setMaxRetry((int) $input->getOption('max-retry'));
-            $context
-                ->setRetryInterval((int) $input->getOption('retry-interval'));
-        }
+                ->enableContinuousTouchAdjustment((int)$input->getOption('enable-touch-adjustment') === 1);
 
-        $context
-            ->start($device, $modulations);
+            $context
+                ->setWaitPresentationReleaseInterval((int)$input->getOption('wait-presentation-release-interval'));
+
+            $context
+                ->setPollingInterval((int)$input->getOption('polling-interval'));
+
+            $context
+                ->setWaitDidNotReleaseTimeout((int)$input->getOption('release-timeout'));
+
+            if ($context->getDriver() instanceof RCS380Driver) {
+                $context
+                    ->setMaxRetry((int)$input->getOption('max-retry'));
+                $context
+                    ->setRetryInterval((int)$input->getOption('retry-interval'));
+            }
+
+            $context
+                ->start($device, $modulations);
+        } catch (\Throwable $e) {
+            $output->writeln("<error>{$e}</error>");
+            return Command::FAILURE;
+        }
 
         return Command::SUCCESS;
     }

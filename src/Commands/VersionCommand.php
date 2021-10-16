@@ -27,13 +27,18 @@ class VersionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $context = $this->createNFCContext($input, $output);
+        try {
+            $context = $this->createNFCContext($input, $output);
 
-        if ($context === null) {
-            return Command::INVALID;
+            if ($context === null) {
+                return Command::INVALID;
+            }
+
+            $output->writeln("{$context->getVersion()}");
+        } catch (\Throwable $e) {
+            $output->writeln("<error>{$e}</error>");
+            return Command::FAILURE;
         }
-
-        $output->writeln("{$context->getVersion()}");
 
         return Command::SUCCESS;
     }

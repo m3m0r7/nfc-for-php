@@ -357,7 +357,7 @@ class RCS380Command
 
         if ($errorCode < 0) {
             throw new NFCDeviceException(
-                "Data send failed [{$errorCode}] on {$this->NFCDevice->getDeviceName()} [{$this->NFCDevice->getConnection()}]"
+                "Data send failed [{$this->NFCContext->getFFI()->libusb_error_name($errorCode)} ({$errorCode})] on {$this->NFCDevice->getDeviceName()} [{$this->NFCDevice->getConnection()}]"
             );
         }
 
@@ -389,7 +389,7 @@ class RCS380Command
 
         if ($errorCode < 0) {
             throw new NFCDeviceException(
-                "Data recv failed [{$errorCode}] on {$this->NFCDevice->getDeviceName()} [{$this->NFCDevice->getConnection()}]"
+                "Data recv failed [{$this->NFCContext->getFFI()->libusb_error_name($errorCode)} ({$errorCode})] on {$this->NFCDevice->getDeviceName()} [{$this->NFCDevice->getConnection()}]"
             );
         }
 
